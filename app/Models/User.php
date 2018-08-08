@@ -26,4 +26,12 @@ class User extends Authenticatable
     protected $hidden = [
         'password', 'remember_token',
     ];
+
+    /**
+     * Get the properties created by the user.
+     */
+    public function properties()
+    {
+        return $this->hasMany('App\Models\Property');
+    }
 }

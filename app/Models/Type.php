@@ -16,4 +16,12 @@ class Type extends Model
     protected $fillable = [
         'name'
     ];
+
+    /**
+     * Get the properties for the type.
+     */
+    public function properties()
+    {
+        return $this->hasMany('App\Models\Property');
+    }
 }

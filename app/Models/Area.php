@@ -16,4 +16,12 @@ class Area extends Model
     protected $fillable = [
         'name'
     ];
+
+    /**
+     * Get the properties for the area.
+     */
+    public function properties()
+    {
+        return $this->hasMany('App\Models\Property');
+    }
 }

@@ -7,7 +7,10 @@
 
 require('./bootstrap');
 
-window.Vue = require('vue');
+import Vue from 'vue';
+import VueSwal from 'vue-swal';
+
+Vue.use(VueSwal)
 
 /**
  * Next, we will create a fresh Vue application instance and attach it to
@@ -15,8 +18,29 @@ window.Vue = require('vue');
  * or customize the JavaScript scaffolding to fit your unique needs.
  */
 
-Vue.component('example-component', require('./components/ExampleComponent.vue'));
+Vue.component('confirm-delete', require('./components/ConfirmDelete.vue'));
 
 const app = new Vue({
     el: '#app'
 });
+
+$(document).ready(function(){
+	$('[data-toggle="tooltip"]').tooltip();
+})
+
+
+// $(document).ready(function(){
+// 	$('.selectpicker').selectpicker({
+// 	 	'liveSearch' : true,
+// 	 	'showTick' : true,
+// 	 	'tickIcon' : 'fa-check',
+// 	 	'iconBase' : 'fa'
+// 	});
+
+// 	$('.datepicker').datepicker({
+// 	    format: "dd M, yyyy",
+// 	    clearBtn: true,
+// 	    orientation: "bottom auto",
+// 	    todayHighlight: true
+// 	});
+// })

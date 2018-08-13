@@ -13920,6 +13920,7 @@ var app = new __WEBPACK_IMPORTED_MODULE_0_vue___default.a({
 
 $(document).ready(function () {
   $('[data-toggle="tooltip"]').tooltip();
+  $('div.alert').not('.alert-important').delay(2000).fadeOut(350);
 });
 
 // $(document).ready(function(){

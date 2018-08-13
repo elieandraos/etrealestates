@@ -19,6 +19,7 @@ class Property extends Model
         'amount',
         'sq_ft',
         'city',
+        'reference',
         'nb_bathrooms',
         'nb_parkings',
         'nb_bedrooms',

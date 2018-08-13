@@ -20,6 +20,7 @@ class CreatePropertiesTable extends Migration
             $table->double('amount', 8, 2)->index();
             $table->integer('sq_ft')->index();
             $table->string('city')->nullable();
+            $table->string('reference')->index()->nullable();
             $table->integer('nb_bathrooms')->index()->nullable();
             $table->integer('nb_parkings')->index()->nullable();
             $table->integer('nb_bedrooms')->index()->nullable();

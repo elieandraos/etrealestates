@@ -9,7 +9,7 @@ use App\Http\Controllers\Controller;
 
 class TypeController extends Controller
 {
-     public function index() 
+    public function index() 
     {
     	$types = Type::orderBy('name', 'ASC')->get();
     	return view('admin.types.index', ['types' => $types]);

@@ -19,6 +19,9 @@ html body{
     background-color: #f8f9fa;
     font-weight: 300;
 }
+.mt0{
+    margin-top: 0px !important;
+}
 /** End body **/
 
 
@@ -118,6 +121,16 @@ div.panel-body
 
 
 /** Forms **/
+.form-heading {
+font-size: 16px;
+    margin-bottom: 14px;
+    margin-top: 35px;
+    font-weight: 300;
+    font-family: Roboto Condensed;
+    padding-left: 10px;
+    border-left: 2px solid $color-secondary;
+    color: $color-secondary;
+}
 .form-horizontal .form-group:last-child{
 	margin-bottom: 0;
 }
@@ -211,12 +224,13 @@ td.row-actions ul li i {
 /** Sidebar Menu **/
 ul.sidebar-menu{
     list-style: none;
+    padding-left: 0;
 }
 ul.sidebar-menu li.header{
     color: $color-secondary;
     font-weight: 200;
-    margin-bottom: 5px;
-    font-size: 15px;
+    margin-bottom: 10px;
+    font-size: 16px;
     text-transform: uppercase;
     margin-top: 30px;
     font-family: "Roboto Condensed";
@@ -225,7 +239,7 @@ ul.sidebar-menu li a{
     font-weight: 400;
     font-size: 13px;
     color: $color-tertiary;
-    margin-bottom: 5px;
+    margin-bottom: 10px;
     display: block;
 }
 ul.sidebar-menu li a:hover,
@@ -237,3 +251,69 @@ ul.sidebar-menu li a i.fa{
     width: 16px;
 }
 /** End Sidebar Menu **/
+
+/** Input group addon **/
+.input-group-addon {
+    padding: 10px 12px;
+    font-size: 14px;
+    font-weight: 200;
+    line-height: 1;
+    color: #555;
+    text-align: center;
+    background-color: #eee;
+    border: 1px solid #e8e8e8;
+    border-radius: 4px;
+}
+.input-group-addon:first-child{
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+    border-right: 0;
+}
+/** End Input group addon **/
+
+/** Bootstrap select customization **/
+div.bootstrap-select{
+    border: 1px solid #e8e8e8;
+    border-radius: 5px;
+    background: #fff;
+    width: 100% !important;
+    outline: 0 !important;
+}
+div.bootstrap-select button,
+div.bootstrap-select button:hover,
+div.bootstrap-select button:active,
+div.bootstrap-select button:focus{
+    border: none;
+    background-color: #FFF !important;
+    box-shadow: none !important;
+    outline: none !important;
+    font-weight: 300;
+    outline: 0 !important;
+}
+div.bootstrap-select .dropdown-menu > li > a{
+    font-weight: 300;
+}
+div.bootstrap-select .dropdown-menu > li > a > span.fa{
+    color: #4b6372;
+    margin-right: 10px;
+    font-size: 16px;
+    width: 15px;
+}
+div.bootstrap-select button.btn-default{
+    font-weight: 300;
+    color: #4b6372;
+}
+div.bootstrap-select .dropdown-menu > .active > a,
+div.bootstrap-select .dropdown-menu > .active > a:hover,
+div.bootstrap-select .dropdown-menu > .active > a:focus{
+    background-color: #FFF;
+    color: #4b6372;
+    outline: 0 !important;
+}
+.bootstrap-select.btn-group .dropdown-toggle .filter-option{
+    font-size: 13px !important;
+    color: #4b6372 !important;
+    outline: 0 !important;
+}
+/** End of bootsrap select customization **/
+

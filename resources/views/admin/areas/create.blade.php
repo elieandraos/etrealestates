@@ -5,8 +5,7 @@
     <div class="row">
         <div class="col-md-12">
             <h1 class="title">Add Area</h1>
-            <h2 class="subtitle">Fill in your area details</h2>
-
+            
             <div class="panel panel-default">
                 <div class="panel-body">
                     <form class="form-horizontal" method="POST" action="{{ route('areas.store') }}">

@@ -9,6 +9,7 @@ require('./bootstrap');
 
 import Vue from 'vue';
 import VueSwal from 'vue-swal';
+require('bootstrap-select');
 
 Vue.use(VueSwal)
 
@@ -27,6 +28,11 @@ const app = new Vue({
 $(document).ready(function(){
 	$('[data-toggle="tooltip"]').tooltip();
 	$('div.alert').not('.alert-important').delay(2000).fadeOut(350);
+	$('.selectpicker').selectpicker({
+	 	'showTick' : true,
+	 	'tickIcon' : 'fa-check',
+	 	'iconBase' : 'fa'
+	});
 })
 
 

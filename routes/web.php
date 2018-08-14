@@ -21,4 +21,5 @@ Route::get('/home', 'HomeController@index')->name('home');
 
 Route::namespace('Admin')->middleware(['auth'])->group(function () {
     Route::resource('areas', 'AreaController');
+    Route::resource('types', 'TypeController');
 });

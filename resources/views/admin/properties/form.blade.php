@@ -5,12 +5,12 @@
 </div>
 
 <div class="row">
-    <div class="form-group{{ $errors->has('name') ? ' has-error' : '' }} col-md-3">
-        <label for="name" class="control-label">Name *</label>
+    <div class="form-group{{ $errors->has('title') ? ' has-error' : '' }} col-md-3">
+        <label for="title" class="control-label">Title *</label>
         <div>
-            {!! Form::text('name', old('name'), [ 'class' => 'form-control', 'id' => 'name', 'autocomplete' => 'off'] ) !!}
-            @if ($errors->has('name'))
-                <span class="help-block">{{ $errors->first('name') }}</span>
+            {!! Form::text('title', old('title'), [ 'class' => 'form-control', 'id' => 'title', 'autocomplete' => 'off'] ) !!}
+            @if ($errors->has('title'))
+                <span class="help-block">{{ $errors->first('title') }}</span>
             @endif
         </div>
     </div>
@@ -20,10 +20,10 @@
         <div class="input-group">
              <span class="input-group-addon">m<sup>2</sup></span>
             {!! Form::text('sq_ft', old('sq_ft'), [ 'class' => 'form-control', 'id' => 'sq_ft', 'autocomplete' => 'off'] ) !!}
-            @if ($errors->has('sq_ft'))
-                <span class="help-block">{{ $errors->first('sq_ft') }}</span>
-            @endif
         </div>
+        @if ($errors->has('sq_ft'))
+            <span class="help-block">{{ $errors->first('sq_ft') }}</span>
+        @endif
     </div>
 
     <div class="form-group{{ $errors->has('amount') ? ' has-error' : '' }} col-md-3">
@@ -31,10 +31,10 @@
         <div class="input-group">
              <span class="input-group-addon">USD</span>
             {!! Form::text('amount', old('amount'), [ 'class' => 'form-control', 'id' => 'amount', 'autocomplete' => 'off'] ) !!}
-            @if ($errors->has('amount'))
-                <span class="help-block">{{ $errors->first('amount') }}</span>
-            @endif
         </div>
+        @if ($errors->has('amount'))
+            <span class="help-block">{{ $errors->first('amount') }}</span>
+        @endif
     </div>
 
     <div class="form-group{{ $errors->has('listed_for') ? ' has-error' : '' }} col-md-3">
@@ -145,9 +145,9 @@
 <div class="form-group buttons">
     <div class="col-md-8 col-md-offset-4">
         <button type="submit" class="btn btn-primary">
-            Save type
+            Save property
         </button>
-         <a class="btn btn-secondary" href="{!! route('types.index') !!}">
+         <a class="btn btn-secondary" href="{!! route('properties.index') !!}">
             Back
         </a>
     </div>

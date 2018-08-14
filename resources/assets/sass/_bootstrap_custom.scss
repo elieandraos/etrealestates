@@ -22,6 +22,11 @@ html body{
 .mt0{
     margin-top: 0px !important;
 }
+.no-listing{
+    color: $color-secondary;
+    font-size: 18px;
+    font-style: italic;
+}
 /** End body **/
 
 
@@ -147,6 +152,7 @@ font-size: 16px;
     background: #fff;
     padding: 0 .8125rem;
     box-shadow: none;
+    font-weight: 200;
 }
 .form-group .form-control:focus,
 .has-error.form-group .form-control:focus{

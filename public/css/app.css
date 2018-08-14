@@ -10508,6 +10508,12 @@ html body {
   margin-top: 0px !important;
 }
 
+.no-listing {
+  color: #a8a8a8;
+  font-size: 18px;
+  font-style: italic;
+}
+
 /** End body **/
 
 /** Links **/
@@ -10651,6 +10657,7 @@ div.panel-body {
   padding: 0 .8125rem;
   -webkit-box-shadow: none;
           box-shadow: none;
+  font-weight: 200;
 }
 
 .form-group .form-control:focus,

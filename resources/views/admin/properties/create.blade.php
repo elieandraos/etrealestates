@@ -8,7 +8,7 @@
             
             <div class="panel panel-default">
                 <div class="panel-body">
-                    <form class="form-horizontal" method="POST" action="{{ route('types.store') }}">
+                    <form class="form-horizontal" method="POST" action="{{ route('properties.store') }}">
                         {{ csrf_field() }}
                         @include('admin.properties.form')
                     </form>

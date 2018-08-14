@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 
 class Property extends Model
@@ -54,5 +55,27 @@ class Property extends Model
     public function author()
     {
         return $this->belongsTo('App\Models\User');
+    }
+
+    /**
+     * Amount accessor
+     * 
+     * @param type $value 
+     * @return type
+     */
+    public function getAmountDisplayAttribute()
+    {
+        return number_format($this->amount, 0, '.', ',')." $";
+    }
+
+    /**
+     * Created at accessor
+     * 
+     * @param type $value 
+     * @return type
+     */
+    public function getListedAtAttribute()
+    {
+        return Carbon::parse($this->created_at)->format('d M, Y');
     }
 }

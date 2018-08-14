@@ -25,8 +25,8 @@ class CreatePropertiesTable extends Migration
             $table->integer('nb_parkings')->index()->nullable();
             $table->integer('nb_bedrooms')->index()->nullable();
             $table->text('additional_info')->nullable(); // for stuff like master bedroom, sea view, reception etc...
-            $table->float('lat', 10, 6);
-            $table->float('lng', 10, 6);
+            $table->float('lat', 10, 6)->default(0);
+            $table->float('lng', 10, 6)->default(0);
             $table->string('listed_for')->index()->default('sale'); // sale or rent
 
             $table->integer('area_id')->unsigned();

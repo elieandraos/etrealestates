@@ -9,26 +9,43 @@
         <div class="col-md-10">
             <h1 class="title">
                 List of properties
-                <a class="btn btn-primary header-button" href="{!! route('properties.create') !!}">Add new property</a>
+                @if($properties->count())
+                    <a class="btn btn-primary header-button" href="{!! route('properties.create') !!}">Add new property</a>
+                @endif
             </h1>
 
             <div class="panel panel-default">
                 <div class="panel-body">
                     @if(!$properties->count())
-                        You did not add any property yet.
+                        <center class='no-listing'>
+                            <p>You did not add any property yet.<p>
+                            <a class="btn btn-primary" href="{!! route('properties.create') !!}">Add new property</a>
+                        </center>
                     @else
                         @include('flash::message')
                         <table class="table table-hover">
                             <thead>
                                 <tr>
-                                    <th>Name</th>
+                                    <th>Reference</th>
+                                    <th>Title</th>
+                                    <th>Square m<sup>2</sup></th>
+                                    <th>Amount</th>
+                                    <th>Type</th>
+                                    <th>Area</th>
+                                    <th>Listed On</th>
                                     <th></th>
                                 </tr>
                             </thead>
                             <tbody>
                                 @foreach($properties as $property)
                                     <tr>
-                                        <td>{!! $property->name !!}</td>
+                                        <td>{!! $property->reference !!}</td>
+                                        <td>{!! $property->title !!}</td>
+                                        <td>{!! $property->sq_ft !!}</td>
+                                        <td>{!! $property->amount_display !!}</td>
+                                        <td>{!! $property->type->name !!}</td>
+                                        <td>{!! $property->area->name !!}</td>
+                                        <td>{!! $property->listed_at !!}</td>
                                         <td class="row-actions">
                                             @include('admin.properties._actions')
                                         </td>
@@ -36,6 +53,8 @@
                                 @endforeach
                             </tbody>  
                         </table>
+
+                        {{ $properties->links() }}
                     @endif
                 </div>
             </div>

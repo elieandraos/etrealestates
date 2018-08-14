@@ -59,7 +59,6 @@
     </div>
 </div>
 
-
 <div class="row">
     <div class="form-group{{ $errors->has('area_id') ? ' has-error' : '' }} col-md-4">
         <label for="area_id" class="control-label">Area *</label>
@@ -141,6 +140,21 @@
     </div>
 </div>
 
+<div class="row">
+    <div class="col-md-12">
+        <div class="form-heading">
+            Featured Image <i class="fa fa-question-circle-o" data-toggle="tooltip" data-placement="top" title="should respect 768x576 ratio"></i>
+        </div>  
+    </div>
+</div>
+
+<div class="row">
+    <div class="form-group col-md-4">
+        <div>
+            <preview-upload name="featured_image"></preview-upload>
+        </div>
+    </div>
+</div>
 
 <div class="form-group buttons">
     <div class="col-md-8 col-md-offset-4">

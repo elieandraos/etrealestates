@@ -20,6 +20,7 @@ Vue.use(VueSwal)
  */
 
 Vue.component('confirm-delete', require('./components/ConfirmDelete.vue'));
+Vue.component('preview-upload', require('./components/PreviewUpload.vue'));
 
 const app = new Vue({
     el: '#app'
@@ -34,20 +35,3 @@ $(document).ready(function(){
 	 	'iconBase' : 'fa'
 	});
 })
-
-
-// $(document).ready(function(){
-// 	$('.selectpicker').selectpicker({
-// 	 	'liveSearch' : true,
-// 	 	'showTick' : true,
-// 	 	'tickIcon' : 'fa-check',
-// 	 	'iconBase' : 'fa'
-// 	});
-
-// 	$('.datepicker').datepicker({
-// 	    format: "dd M, yyyy",
-// 	    clearBtn: true,
-// 	    orientation: "bottom auto",
-// 	    todayHighlight: true
-// 	});
-// })

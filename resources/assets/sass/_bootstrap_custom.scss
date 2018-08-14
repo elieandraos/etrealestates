@@ -207,3 +207,33 @@ td.row-actions ul li i {
  }
 /** End Sweet alert **/
 
+
+/** Sidebar Menu **/
+ul.sidebar-menu{
+    list-style: none;
+}
+ul.sidebar-menu li.header{
+    color: $color-secondary;
+    font-weight: 200;
+    margin-bottom: 5px;
+    font-size: 15px;
+    text-transform: uppercase;
+    margin-top: 30px;
+    font-family: "Roboto Condensed";
+}
+ul.sidebar-menu li a{
+    font-weight: 400;
+    font-size: 13px;
+    color: $color-tertiary;
+    margin-bottom: 5px;
+    display: block;
+}
+ul.sidebar-menu li a:hover,
+ul.sidebar-menu li a.active{
+    text-decoration: none;
+    color: #2f86eb;
+}
+ul.sidebar-menu li a i.fa{
+    width: 16px;
+}
+/** End Sidebar Menu **/

@@ -3,10 +3,15 @@
 namespace App\Models;
 
 use Carbon\Carbon;
+use Spatie\MediaLibrary\Models\Media;
 use Illuminate\Database\Eloquent\Model;
+use Spatie\MediaLibrary\HasMedia\HasMedia;
+use Spatie\MediaLibrary\HasMedia\HasMediaTrait;
 
-class Property extends Model
+class Property extends Model implements HasMedia
 {
+    use HasMediaTrait;
+
     protected $table = 'properties';
 
     /**
@@ -78,4 +83,28 @@ class Property extends Model
     {
         return Carbon::parse($this->created_at)->format('d M, Y');
     }
+
+    /**
+     * Property media collection
+     * 
+     * @return type
+     */
+    public function registerMediaCollections()
+    {
+        $this->addMediaCollection('featured')
+                ->singleFile()
+                ->registerMediaConversions(function (Media $media) {
+                    $this
+                        ->addMediaConversion('thumb')
+                        ->width(320)
+                        ->height(240);
+
+                    $this
+                        ->addMediaConversion('full')
+                        ->width(768)
+                        ->height(576);
+                });
+    }
+
+
 }

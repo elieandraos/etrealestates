@@ -29,7 +29,8 @@ class PropertyController extends Controller
     {
         $input = $request->all();
         $input['listed_by'] = Auth::user()->id;
-    	Property::create($input);
+    	$property = Property::create($input);
+        $property->addMediaFromRequest('featured_image')->toMediaCollection('featured');
     	flash('Property was added successfully.')->success();
         return redirect(route('properties.index'));
 	}

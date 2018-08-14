@@ -8,7 +8,7 @@
              
             <div class="panel panel-default">
                 <div class="panel-body">
-                    {!! Form::model($property, ['route' => ['properties.update', $property->id], 'class' => 'form-horizontal', 'method' => 'PATCH']) !!}
+                    {!! Form::model($property, ['route' => ['properties.update', $property->id], 'class' => 'form-horizontal', 'method' => 'PATCH', 'enctype' => "multipart/form-data"]) !!}
                         @include('admin.properties.form')
                     {!! Form::close() !!}
                 </div>

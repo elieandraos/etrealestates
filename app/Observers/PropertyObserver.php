@@ -15,6 +15,7 @@ class PropertyObserver
      */
     public function created(Property $property)
     {
+        // update the reference
         $areaCode = strtoupper(substr($property->area->name, 0, 1)); // first letter of the area
         $cityCode = strtoupper(substr($property->city, 0, 1)); // first letter of the city
         $property->reference = $areaCode.$cityCode.$property->id;

@@ -70,7 +70,7 @@
 "use strict";
 
 
-var bind = __webpack_require__(6);
+var bind = __webpack_require__(8);
 var isBuffer = __webpack_require__(22);
 
 /*global toString:true*/
@@ -402,6 +402,115 @@ module.exports = g;
 
 /***/ }),
 /* 2 */
+/***/ (function(module, exports) {
+
+/* globals __VUE_SSR_CONTEXT__ */
+
+// IMPORTANT: Do NOT use ES2015 features in this file.
+// This module is a runtime utility for cleaner component module output and will
+// be included in the final webpack user bundle.
+
+module.exports = function normalizeComponent (
+  rawScriptExports,
+  compiledTemplate,
+  functionalTemplate,
+  injectStyles,
+  scopeId,
+  moduleIdentifier /* server only */
+) {
+  var esModule
+  var scriptExports = rawScriptExports = rawScriptExports || {}
+
+  // ES6 modules interop
+  var type = typeof rawScriptExports.default
+  if (type === 'object' || type === 'function') {
+    esModule = rawScriptExports
+    scriptExports = rawScriptExports.default
+  }
+
+  // Vue.extend constructor export interop
+  var options = typeof scriptExports === 'function'
+    ? scriptExports.options
+    : scriptExports
+
+  // render functions
+  if (compiledTemplate) {
+    options.render = compiledTemplate.render
+    options.staticRenderFns = compiledTemplate.staticRenderFns
+    options._compiled = true
+  }
+
+  // functional template
+  if (functionalTemplate) {
+    options.functional = true
+  }
+
+  // scopedId
+  if (scopeId) {
+    options._scopeId = scopeId
+  }
+
+  var hook
+  if (moduleIdentifier) { // server build
+    hook = function (context) {
+      // 2.3 injection
+      context =
+        context || // cached call
+        (this.$vnode && this.$vnode.ssrContext) || // stateful
+        (this.parent && this.parent.$vnode && this.parent.$vnode.ssrContext) // functional
+      // 2.2 with runInNewContext: true
+      if (!context && typeof __VUE_SSR_CONTEXT__ !== 'undefined') {
+        context = __VUE_SSR_CONTEXT__
+      }
+      // inject component styles
+      if (injectStyles) {
+        injectStyles.call(this, context)
+      }
+      // register component module identifier for async chunk inferrence
+      if (context && context._registeredComponents) {
+        context._registeredComponents.add(moduleIdentifier)
+      }
+    }
+    // used by ssr in case component is cached and beforeCreate
+    // never gets called
+    options._ssrRegister = hook
+  } else if (injectStyles) {
+    hook = injectStyles
+  }
+
+  if (hook) {
+    var functional = options.functional
+    var existing = functional
+      ? options.render
+      : options.beforeCreate
+
+    if (!functional) {
+      // inject component registration as beforeCreate hook
+      options.beforeCreate = existing
+        ? [].concat(existing, hook)
+        : [hook]
+    } else {
+      // for template-only hot-reload because in that case the render fn doesn't
+      // go through the normalizer
+      options._injectStyles = hook
+      // register for functioal component in vue file
+      options.render = function renderWithStyleInjection (h, context) {
+        hook.call(context)
+        return existing(h, context)
+      }
+    }
+  }
+
+  return {
+    esModule: esModule,
+    exports: scriptExports,
+    options: options
+  }
+}
+
+
+/***/ }),
+/* 3 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
@@ -10772,7 +10881,7 @@ return jQuery;
 
 
 /***/ }),
-/* 3 */
+/* 4 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -10795,10 +10904,10 @@ function getDefaultAdapter() {
   var adapter;
   if (typeof XMLHttpRequest !== 'undefined') {
     // For browsers use XHR adapter
-    adapter = __webpack_require__(8);
+    adapter = __webpack_require__(10);
   } else if (typeof process !== 'undefined') {
     // For node use HTTP adapter
-    adapter = __webpack_require__(8);
+    adapter = __webpack_require__(10);
   }
   return adapter;
 }
@@ -10873,119 +10982,320 @@ utils.forEach(['post', 'put', 'patch'], function forEachMethodWithData(method) {
 
 module.exports = defaults;
 
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(7)))
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(9)))
 
 /***/ }),
-/* 4 */
+/* 5 */
 /***/ (function(module, exports) {
 
-/* globals __VUE_SSR_CONTEXT__ */
+/*
+	MIT License http://www.opensource.org/licenses/mit-license.php
+	Author Tobias Koppers @sokra
+*/
+// css base code, injected by the css-loader
+module.exports = function(useSourceMap) {
+	var list = [];
 
-// IMPORTANT: Do NOT use ES2015 features in this file.
-// This module is a runtime utility for cleaner component module output and will
-// be included in the final webpack user bundle.
+	// return the list of modules as css string
+	list.toString = function toString() {
+		return this.map(function (item) {
+			var content = cssWithMappingToString(item, useSourceMap);
+			if(item[2]) {
+				return "@media " + item[2] + "{" + content + "}";
+			} else {
+				return content;
+			}
+		}).join("");
+	};
 
-module.exports = function normalizeComponent (
-  rawScriptExports,
-  compiledTemplate,
-  functionalTemplate,
-  injectStyles,
-  scopeId,
-  moduleIdentifier /* server only */
-) {
-  var esModule
-  var scriptExports = rawScriptExports = rawScriptExports || {}
+	// import a list of modules into the list
+	list.i = function(modules, mediaQuery) {
+		if(typeof modules === "string")
+			modules = [[null, modules, ""]];
+		var alreadyImportedModules = {};
+		for(var i = 0; i < this.length; i++) {
+			var id = this[i][0];
+			if(typeof id === "number")
+				alreadyImportedModules[id] = true;
+		}
+		for(i = 0; i < modules.length; i++) {
+			var item = modules[i];
+			// skip already imported module
+			// this implementation is not 100% perfect for weird media query combinations
+			//  when a module is imported multiple times with different media queries.
+			//  I hope this will never occur (Hey this way we have smaller bundles)
+			if(typeof item[0] !== "number" || !alreadyImportedModules[item[0]]) {
+				if(mediaQuery && !item[2]) {
+					item[2] = mediaQuery;
+				} else if(mediaQuery) {
+					item[2] = "(" + item[2] + ") and (" + mediaQuery + ")";
+				}
+				list.push(item);
+			}
+		}
+	};
+	return list;
+};
 
-  // ES6 modules interop
-  var type = typeof rawScriptExports.default
-  if (type === 'object' || type === 'function') {
-    esModule = rawScriptExports
-    scriptExports = rawScriptExports.default
+function cssWithMappingToString(item, useSourceMap) {
+	var content = item[1] || '';
+	var cssMapping = item[3];
+	if (!cssMapping) {
+		return content;
+	}
+
+	if (useSourceMap && typeof btoa === 'function') {
+		var sourceMapping = toComment(cssMapping);
+		var sourceURLs = cssMapping.sources.map(function (source) {
+			return '/*# sourceURL=' + cssMapping.sourceRoot + source + ' */'
+		});
+
+		return [content].concat(sourceURLs).concat([sourceMapping]).join('\n');
+	}
+
+	return [content].join('\n');
+}
+
+// Adapted from convert-source-map (MIT)
+function toComment(sourceMap) {
+	// eslint-disable-next-line no-undef
+	var base64 = btoa(unescape(encodeURIComponent(JSON.stringify(sourceMap))));
+	var data = 'sourceMappingURL=data:application/json;charset=utf-8;base64,' + base64;
+
+	return '/*# ' + data + ' */';
+}
+
+
+/***/ }),
+/* 6 */
+/***/ (function(module, exports, __webpack_require__) {
+
+/*
+  MIT License http://www.opensource.org/licenses/mit-license.php
+  Author Tobias Koppers @sokra
+  Modified by Evan You @yyx990803
+*/
+
+var hasDocument = typeof document !== 'undefined'
+
+if (typeof DEBUG !== 'undefined' && DEBUG) {
+  if (!hasDocument) {
+    throw new Error(
+    'vue-style-loader cannot be used in a non-browser environment. ' +
+    "Use { target: 'node' } in your Webpack config to indicate a server-rendering environment."
+  ) }
+}
+
+var listToStyles = __webpack_require__(51)
+
+/*
+type StyleObject = {
+  id: number;
+  parts: Array<StyleObjectPart>
+}
+
+type StyleObjectPart = {
+  css: string;
+  media: string;
+  sourceMap: ?string
+}
+*/
+
+var stylesInDom = {/*
+  [id: number]: {
+    id: number,
+    refs: number,
+    parts: Array<(obj?: StyleObjectPart) => void>
   }
+*/}
 
-  // Vue.extend constructor export interop
-  var options = typeof scriptExports === 'function'
-    ? scriptExports.options
-    : scriptExports
+var head = hasDocument && (document.head || document.getElementsByTagName('head')[0])
+var singletonElement = null
+var singletonCounter = 0
+var isProduction = false
+var noop = function () {}
+var options = null
+var ssrIdKey = 'data-vue-ssr-id'
 
-  // render functions
-  if (compiledTemplate) {
-    options.render = compiledTemplate.render
-    options.staticRenderFns = compiledTemplate.staticRenderFns
-    options._compiled = true
-  }
+// Force single-tag solution on IE6-9, which has a hard limit on the # of <style>
+// tags it will allow on a page
+var isOldIE = typeof navigator !== 'undefined' && /msie [6-9]\b/.test(navigator.userAgent.toLowerCase())
 
-  // functional template
-  if (functionalTemplate) {
-    options.functional = true
-  }
+module.exports = function (parentId, list, _isProduction, _options) {
+  isProduction = _isProduction
 
-  // scopedId
-  if (scopeId) {
-    options._scopeId = scopeId
-  }
+  options = _options || {}
 
-  var hook
-  if (moduleIdentifier) { // server build
-    hook = function (context) {
-      // 2.3 injection
-      context =
-        context || // cached call
-        (this.$vnode && this.$vnode.ssrContext) || // stateful
-        (this.parent && this.parent.$vnode && this.parent.$vnode.ssrContext) // functional
-      // 2.2 with runInNewContext: true
-      if (!context && typeof __VUE_SSR_CONTEXT__ !== 'undefined') {
-        context = __VUE_SSR_CONTEXT__
-      }
-      // inject component styles
-      if (injectStyles) {
-        injectStyles.call(this, context)
-      }
-      // register component module identifier for async chunk inferrence
-      if (context && context._registeredComponents) {
-        context._registeredComponents.add(moduleIdentifier)
-      }
+  var styles = listToStyles(parentId, list)
+  addStylesToDom(styles)
+
+  return function update (newList) {
+    var mayRemove = []
+    for (var i = 0; i < styles.length; i++) {
+      var item = styles[i]
+      var domStyle = stylesInDom[item.id]
+      domStyle.refs--
+      mayRemove.push(domStyle)
     }
-    // used by ssr in case component is cached and beforeCreate
-    // never gets called
-    options._ssrRegister = hook
-  } else if (injectStyles) {
-    hook = injectStyles
-  }
-
-  if (hook) {
-    var functional = options.functional
-    var existing = functional
-      ? options.render
-      : options.beforeCreate
-
-    if (!functional) {
-      // inject component registration as beforeCreate hook
-      options.beforeCreate = existing
-        ? [].concat(existing, hook)
-        : [hook]
+    if (newList) {
+      styles = listToStyles(parentId, newList)
+      addStylesToDom(styles)
     } else {
-      // for template-only hot-reload because in that case the render fn doesn't
-      // go through the normalizer
-      options._injectStyles = hook
-      // register for functioal component in vue file
-      options.render = function renderWithStyleInjection (h, context) {
-        hook.call(context)
-        return existing(h, context)
+      styles = []
+    }
+    for (var i = 0; i < mayRemove.length; i++) {
+      var domStyle = mayRemove[i]
+      if (domStyle.refs === 0) {
+        for (var j = 0; j < domStyle.parts.length; j++) {
+          domStyle.parts[j]()
+        }
+        delete stylesInDom[domStyle.id]
       }
     }
   }
+}
 
-  return {
-    esModule: esModule,
-    exports: scriptExports,
-    options: options
+function addStylesToDom (styles /* Array<StyleObject> */) {
+  for (var i = 0; i < styles.length; i++) {
+    var item = styles[i]
+    var domStyle = stylesInDom[item.id]
+    if (domStyle) {
+      domStyle.refs++
+      for (var j = 0; j < domStyle.parts.length; j++) {
+        domStyle.parts[j](item.parts[j])
+      }
+      for (; j < item.parts.length; j++) {
+        domStyle.parts.push(addStyle(item.parts[j]))
+      }
+      if (domStyle.parts.length > item.parts.length) {
+        domStyle.parts.length = item.parts.length
+      }
+    } else {
+      var parts = []
+      for (var j = 0; j < item.parts.length; j++) {
+        parts.push(addStyle(item.parts[j]))
+      }
+      stylesInDom[item.id] = { id: item.id, refs: 1, parts: parts }
+    }
+  }
+}
+
+function createStyleElement () {
+  var styleElement = document.createElement('style')
+  styleElement.type = 'text/css'
+  head.appendChild(styleElement)
+  return styleElement
+}
+
+function addStyle (obj /* StyleObjectPart */) {
+  var update, remove
+  var styleElement = document.querySelector('style[' + ssrIdKey + '~="' + obj.id + '"]')
+
+  if (styleElement) {
+    if (isProduction) {
+      // has SSR styles and in production mode.
+      // simply do nothing.
+      return noop
+    } else {
+      // has SSR styles but in dev mode.
+      // for some reason Chrome can't handle source map in server-rendered
+      // style tags - source maps in <style> only works if the style tag is
+      // created and inserted dynamically. So we remove the server rendered
+      // styles and inject new ones.
+      styleElement.parentNode.removeChild(styleElement)
+    }
+  }
+
+  if (isOldIE) {
+    // use singleton mode for IE9.
+    var styleIndex = singletonCounter++
+    styleElement = singletonElement || (singletonElement = createStyleElement())
+    update = applyToSingletonTag.bind(null, styleElement, styleIndex, false)
+    remove = applyToSingletonTag.bind(null, styleElement, styleIndex, true)
+  } else {
+    // use multi-style-tag mode in all other cases
+    styleElement = createStyleElement()
+    update = applyToTag.bind(null, styleElement)
+    remove = function () {
+      styleElement.parentNode.removeChild(styleElement)
+    }
+  }
+
+  update(obj)
+
+  return function updateStyle (newObj /* StyleObjectPart */) {
+    if (newObj) {
+      if (newObj.css === obj.css &&
+          newObj.media === obj.media &&
+          newObj.sourceMap === obj.sourceMap) {
+        return
+      }
+      update(obj = newObj)
+    } else {
+      remove()
+    }
+  }
+}
+
+var replaceText = (function () {
+  var textStore = []
+
+  return function (index, replacement) {
+    textStore[index] = replacement
+    return textStore.filter(Boolean).join('\n')
+  }
+})()
+
+function applyToSingletonTag (styleElement, index, remove, obj) {
+  var css = remove ? '' : obj.css
+
+  if (styleElement.styleSheet) {
+    styleElement.styleSheet.cssText = replaceText(index, css)
+  } else {
+    var cssNode = document.createTextNode(css)
+    var childNodes = styleElement.childNodes
+    if (childNodes[index]) styleElement.removeChild(childNodes[index])
+    if (childNodes.length) {
+      styleElement.insertBefore(cssNode, childNodes[index])
+    } else {
+      styleElement.appendChild(cssNode)
+    }
+  }
+}
+
+function applyToTag (styleElement, obj) {
+  var css = obj.css
+  var media = obj.media
+  var sourceMap = obj.sourceMap
+
+  if (media) {
+    styleElement.setAttribute('media', media)
+  }
+  if (options.ssrId) {
+    styleElement.setAttribute(ssrIdKey, obj.id)
+  }
+
+  if (sourceMap) {
+    // https://developer.chrome.com/devtools/docs/javascript-debugging
+    // this makes source maps inside style tags work properly in Chrome
+    css += '\n/*# sourceURL=' + sourceMap.sources[0] + ' */'
+    // http://stackoverflow.com/a/26603875
+    css += '\n/*# sourceMappingURL=data:application/json;base64,' + btoa(unescape(encodeURIComponent(JSON.stringify(sourceMap)))) + ' */'
+  }
+
+  if (styleElement.styleSheet) {
+    styleElement.styleSheet.cssText = css
+  } else {
+    while (styleElement.firstChild) {
+      styleElement.removeChild(styleElement.firstChild)
+    }
+    styleElement.appendChild(document.createTextNode(css))
   }
 }
 
 
 /***/ }),
-/* 5 */
+/* 7 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -13526,7 +13836,7 @@ Popper.Defaults = Defaults;
 /* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__(1)))
 
 /***/ }),
-/* 6 */
+/* 8 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -13544,7 +13854,7 @@ module.exports = function bind(fn, thisArg) {
 
 
 /***/ }),
-/* 7 */
+/* 9 */
 /***/ (function(module, exports) {
 
 // shim for using process in browser
@@ -13734,7 +14044,7 @@ process.umask = function() { return 0; };
 
 
 /***/ }),
-/* 8 */
+/* 10 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -13745,7 +14055,7 @@ var settle = __webpack_require__(25);
 var buildURL = __webpack_require__(27);
 var parseHeaders = __webpack_require__(28);
 var isURLSameOrigin = __webpack_require__(29);
-var createError = __webpack_require__(9);
+var createError = __webpack_require__(11);
 var btoa = (typeof window !== 'undefined' && window.btoa && window.btoa.bind(window)) || __webpack_require__(30);
 
 module.exports = function xhrAdapter(config) {
@@ -13921,7 +14231,7 @@ module.exports = function xhrAdapter(config) {
 
 
 /***/ }),
-/* 9 */
+/* 11 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -13946,7 +14256,7 @@ module.exports = function createError(message, config, code, request, response) 
 
 
 /***/ }),
-/* 10 */
+/* 12 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -13958,7 +14268,7 @@ module.exports = function isCancel(value) {
 
 
 /***/ }),
-/* 11 */
+/* 13 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -13984,321 +14294,11 @@ module.exports = Cancel;
 
 
 /***/ }),
-/* 12 */
-/***/ (function(module, exports) {
-
-/*
-	MIT License http://www.opensource.org/licenses/mit-license.php
-	Author Tobias Koppers @sokra
-*/
-// css base code, injected by the css-loader
-module.exports = function(useSourceMap) {
-	var list = [];
-
-	// return the list of modules as css string
-	list.toString = function toString() {
-		return this.map(function (item) {
-			var content = cssWithMappingToString(item, useSourceMap);
-			if(item[2]) {
-				return "@media " + item[2] + "{" + content + "}";
-			} else {
-				return content;
-			}
-		}).join("");
-	};
-
-	// import a list of modules into the list
-	list.i = function(modules, mediaQuery) {
-		if(typeof modules === "string")
-			modules = [[null, modules, ""]];
-		var alreadyImportedModules = {};
-		for(var i = 0; i < this.length; i++) {
-			var id = this[i][0];
-			if(typeof id === "number")
-				alreadyImportedModules[id] = true;
-		}
-		for(i = 0; i < modules.length; i++) {
-			var item = modules[i];
-			// skip already imported module
-			// this implementation is not 100% perfect for weird media query combinations
-			//  when a module is imported multiple times with different media queries.
-			//  I hope this will never occur (Hey this way we have smaller bundles)
-			if(typeof item[0] !== "number" || !alreadyImportedModules[item[0]]) {
-				if(mediaQuery && !item[2]) {
-					item[2] = mediaQuery;
-				} else if(mediaQuery) {
-					item[2] = "(" + item[2] + ") and (" + mediaQuery + ")";
-				}
-				list.push(item);
-			}
-		}
-	};
-	return list;
-};
-
-function cssWithMappingToString(item, useSourceMap) {
-	var content = item[1] || '';
-	var cssMapping = item[3];
-	if (!cssMapping) {
-		return content;
-	}
-
-	if (useSourceMap && typeof btoa === 'function') {
-		var sourceMapping = toComment(cssMapping);
-		var sourceURLs = cssMapping.sources.map(function (source) {
-			return '/*# sourceURL=' + cssMapping.sourceRoot + source + ' */'
-		});
-
-		return [content].concat(sourceURLs).concat([sourceMapping]).join('\n');
-	}
-
-	return [content].join('\n');
-}
-
-// Adapted from convert-source-map (MIT)
-function toComment(sourceMap) {
-	// eslint-disable-next-line no-undef
-	var base64 = btoa(unescape(encodeURIComponent(JSON.stringify(sourceMap))));
-	var data = 'sourceMappingURL=data:application/json;charset=utf-8;base64,' + base64;
-
-	return '/*# ' + data + ' */';
-}
-
-
-/***/ }),
-/* 13 */
-/***/ (function(module, exports, __webpack_require__) {
-
-/*
-  MIT License http://www.opensource.org/licenses/mit-license.php
-  Author Tobias Koppers @sokra
-  Modified by Evan You @yyx990803
-*/
-
-var hasDocument = typeof document !== 'undefined'
-
-if (typeof DEBUG !== 'undefined' && DEBUG) {
-  if (!hasDocument) {
-    throw new Error(
-    'vue-style-loader cannot be used in a non-browser environment. ' +
-    "Use { target: 'node' } in your Webpack config to indicate a server-rendering environment."
-  ) }
-}
-
-var listToStyles = __webpack_require__(50)
-
-/*
-type StyleObject = {
-  id: number;
-  parts: Array<StyleObjectPart>
-}
-
-type StyleObjectPart = {
-  css: string;
-  media: string;
-  sourceMap: ?string
-}
-*/
-
-var stylesInDom = {/*
-  [id: number]: {
-    id: number,
-    refs: number,
-    parts: Array<(obj?: StyleObjectPart) => void>
-  }
-*/}
-
-var head = hasDocument && (document.head || document.getElementsByTagName('head')[0])
-var singletonElement = null
-var singletonCounter = 0
-var isProduction = false
-var noop = function () {}
-var options = null
-var ssrIdKey = 'data-vue-ssr-id'
-
-// Force single-tag solution on IE6-9, which has a hard limit on the # of <style>
-// tags it will allow on a page
-var isOldIE = typeof navigator !== 'undefined' && /msie [6-9]\b/.test(navigator.userAgent.toLowerCase())
-
-module.exports = function (parentId, list, _isProduction, _options) {
-  isProduction = _isProduction
-
-  options = _options || {}
-
-  var styles = listToStyles(parentId, list)
-  addStylesToDom(styles)
-
-  return function update (newList) {
-    var mayRemove = []
-    for (var i = 0; i < styles.length; i++) {
-      var item = styles[i]
-      var domStyle = stylesInDom[item.id]
-      domStyle.refs--
-      mayRemove.push(domStyle)
-    }
-    if (newList) {
-      styles = listToStyles(parentId, newList)
-      addStylesToDom(styles)
-    } else {
-      styles = []
-    }
-    for (var i = 0; i < mayRemove.length; i++) {
-      var domStyle = mayRemove[i]
-      if (domStyle.refs === 0) {
-        for (var j = 0; j < domStyle.parts.length; j++) {
-          domStyle.parts[j]()
-        }
-        delete stylesInDom[domStyle.id]
-      }
-    }
-  }
-}
-
-function addStylesToDom (styles /* Array<StyleObject> */) {
-  for (var i = 0; i < styles.length; i++) {
-    var item = styles[i]
-    var domStyle = stylesInDom[item.id]
-    if (domStyle) {
-      domStyle.refs++
-      for (var j = 0; j < domStyle.parts.length; j++) {
-        domStyle.parts[j](item.parts[j])
-      }
-      for (; j < item.parts.length; j++) {
-        domStyle.parts.push(addStyle(item.parts[j]))
-      }
-      if (domStyle.parts.length > item.parts.length) {
-        domStyle.parts.length = item.parts.length
-      }
-    } else {
-      var parts = []
-      for (var j = 0; j < item.parts.length; j++) {
-        parts.push(addStyle(item.parts[j]))
-      }
-      stylesInDom[item.id] = { id: item.id, refs: 1, parts: parts }
-    }
-  }
-}
-
-function createStyleElement () {
-  var styleElement = document.createElement('style')
-  styleElement.type = 'text/css'
-  head.appendChild(styleElement)
-  return styleElement
-}
-
-function addStyle (obj /* StyleObjectPart */) {
-  var update, remove
-  var styleElement = document.querySelector('style[' + ssrIdKey + '~="' + obj.id + '"]')
-
-  if (styleElement) {
-    if (isProduction) {
-      // has SSR styles and in production mode.
-      // simply do nothing.
-      return noop
-    } else {
-      // has SSR styles but in dev mode.
-      // for some reason Chrome can't handle source map in server-rendered
-      // style tags - source maps in <style> only works if the style tag is
-      // created and inserted dynamically. So we remove the server rendered
-      // styles and inject new ones.
-      styleElement.parentNode.removeChild(styleElement)
-    }
-  }
-
-  if (isOldIE) {
-    // use singleton mode for IE9.
-    var styleIndex = singletonCounter++
-    styleElement = singletonElement || (singletonElement = createStyleElement())
-    update = applyToSingletonTag.bind(null, styleElement, styleIndex, false)
-    remove = applyToSingletonTag.bind(null, styleElement, styleIndex, true)
-  } else {
-    // use multi-style-tag mode in all other cases
-    styleElement = createStyleElement()
-    update = applyToTag.bind(null, styleElement)
-    remove = function () {
-      styleElement.parentNode.removeChild(styleElement)
-    }
-  }
-
-  update(obj)
-
-  return function updateStyle (newObj /* StyleObjectPart */) {
-    if (newObj) {
-      if (newObj.css === obj.css &&
-          newObj.media === obj.media &&
-          newObj.sourceMap === obj.sourceMap) {
-        return
-      }
-      update(obj = newObj)
-    } else {
-      remove()
-    }
-  }
-}
-
-var replaceText = (function () {
-  var textStore = []
-
-  return function (index, replacement) {
-    textStore[index] = replacement
-    return textStore.filter(Boolean).join('\n')
-  }
-})()
-
-function applyToSingletonTag (styleElement, index, remove, obj) {
-  var css = remove ? '' : obj.css
-
-  if (styleElement.styleSheet) {
-    styleElement.styleSheet.cssText = replaceText(index, css)
-  } else {
-    var cssNode = document.createTextNode(css)
-    var childNodes = styleElement.childNodes
-    if (childNodes[index]) styleElement.removeChild(childNodes[index])
-    if (childNodes.length) {
-      styleElement.insertBefore(cssNode, childNodes[index])
-    } else {
-      styleElement.appendChild(cssNode)
-    }
-  }
-}
-
-function applyToTag (styleElement, obj) {
-  var css = obj.css
-  var media = obj.media
-  var sourceMap = obj.sourceMap
-
-  if (media) {
-    styleElement.setAttribute('media', media)
-  }
-  if (options.ssrId) {
-    styleElement.setAttribute(ssrIdKey, obj.id)
-  }
-
-  if (sourceMap) {
-    // https://developer.chrome.com/devtools/docs/javascript-debugging
-    // this makes source maps inside style tags work properly in Chrome
-    css += '\n/*# sourceURL=' + sourceMap.sources[0] + ' */'
-    // http://stackoverflow.com/a/26603875
-    css += '\n/*# sourceMappingURL=data:application/json;base64,' + btoa(unescape(encodeURIComponent(JSON.stringify(sourceMap)))) + ' */'
-  }
-
-  if (styleElement.styleSheet) {
-    styleElement.styleSheet.cssText = css
-  } else {
-    while (styleElement.firstChild) {
-      styleElement.removeChild(styleElement.firstChild)
-    }
-    styleElement.appendChild(document.createTextNode(css))
-  }
-}
-
-
-/***/ }),
 /* 14 */
 /***/ (function(module, exports, __webpack_require__) {
 
 __webpack_require__(15);
-module.exports = __webpack_require__(58);
+module.exports = __webpack_require__(65);
 
 
 /***/ }),
@@ -14323,6 +14323,7 @@ __webpack_require__(16);
 
 
 __webpack_require__(43);
+__webpack_require__(44);
 
 __WEBPACK_IMPORTED_MODULE_0_vue___default.a.use(__WEBPACK_IMPORTED_MODULE_1_vue_swal___default.a);
 
@@ -14332,23 +14333,49 @@ __WEBPACK_IMPORTED_MODULE_0_vue___default.a.use(__WEBPACK_IMPORTED_MODULE_1_vue_
  * or customize the JavaScript scaffolding to fit your unique needs.
  */
 
-__WEBPACK_IMPORTED_MODULE_0_vue___default.a.component('confirm-delete', __webpack_require__(44));
-__WEBPACK_IMPORTED_MODULE_0_vue___default.a.component('preview-upload', __webpack_require__(47));
-__WEBPACK_IMPORTED_MODULE_0_vue___default.a.component('property-card', __webpack_require__(53));
+__WEBPACK_IMPORTED_MODULE_0_vue___default.a.component('confirm-delete', __webpack_require__(45));
+__WEBPACK_IMPORTED_MODULE_0_vue___default.a.component('preview-upload', __webpack_require__(48));
+__WEBPACK_IMPORTED_MODULE_0_vue___default.a.component('property-card', __webpack_require__(54));
+__WEBPACK_IMPORTED_MODULE_0_vue___default.a.component('properties-filter', __webpack_require__(59));
 
 var app = new __WEBPACK_IMPORTED_MODULE_0_vue___default.a({
-  el: '#app'
+	el: '#app'
 });
 
 $(document).ready(function () {
-  $('[data-toggle="tooltip"]').tooltip();
-  $('div.alert').not('.alert-important').delay(2000).fadeOut(350);
-  $('.selectpicker').selectpicker({
-    'showTick': true,
-    'tickIcon': 'fa-check',
-    'iconBase': 'fa'
-  });
+	$('[data-toggle="tooltip"]').tooltip();
+	$('div.alert').not('.alert-important').delay(2000).fadeOut(350);
+	$('.selectpicker').selectpicker({
+		'showTick': true,
+		'tickIcon': 'fa-check',
+		'iconBase': 'fa'
+	});
+
+	$('.nstSlider').nstSlider({
+		"rounding": {
+			"100": "1000",
+			"1000": "10000",
+			"10000": "100000"
+		},
+		"left_grip_selector": ".leftGrip",
+		"right_grip_selector": ".rightGrip",
+		"value_bar_selector": ".bar",
+		"value_changed_callback": function value_changed_callback(cause, leftValue, rightValue) {
+			var $container = $(this).parent();
+			$container.find('.leftLabel').text(String(leftValue).number_format());
+			$container.find('.rightLabel').text(String(rightValue).number_format());
+		}
+	});
 });
+
+String.prototype.number_format = function (d) {
+	var n = this;
+	var c = isNaN(d = Math.abs(d)) ? 2 : d;
+	var s = n < 0 ? "-" : "";
+	var i = parseInt(n = Math.abs(+n || 0).toFixed(c)) + "",
+	    j = (j = i.length) > 3 ? j % 3 : 0;
+	return s + (j ? i.substr(0, j) + ',' : "") + i.substr(j).replace(/(\d{3})(?=\d)/g, "$1" + ',');
+};
 
 /***/ }),
 /* 16 */
@@ -14356,7 +14383,7 @@ $(document).ready(function () {
 
 
 window._ = __webpack_require__(17);
-window.Popper = __webpack_require__(5).default;
+window.Popper = __webpack_require__(7).default;
 
 /**
  * We'll load jQuery and the Bootstrap jQuery plugin which provides support
@@ -14365,7 +14392,7 @@ window.Popper = __webpack_require__(5).default;
  */
 
 try {
-  window.$ = window.jQuery = __webpack_require__(2);
+  window.$ = window.jQuery = __webpack_require__(3);
 
   __webpack_require__(19);
 } catch (e) {}
@@ -31562,7 +31589,7 @@ module.exports = function(module) {
   * Licensed under MIT (https://github.com/twbs/bootstrap/blob/master/LICENSE)
   */
 (function (global, factory) {
-   true ? factory(exports, __webpack_require__(2), __webpack_require__(5)) :
+   true ? factory(exports, __webpack_require__(3), __webpack_require__(7)) :
   typeof define === 'function' && define.amd ? define(['exports', 'jquery', 'popper.js'], factory) :
   (factory((global.bootstrap = {}),global.jQuery,global.Popper));
 }(this, (function (exports,$,Popper) { 'use strict';
@@ -35516,9 +35543,9 @@ module.exports = __webpack_require__(21);
 
 
 var utils = __webpack_require__(0);
-var bind = __webpack_require__(6);
+var bind = __webpack_require__(8);
 var Axios = __webpack_require__(23);
-var defaults = __webpack_require__(3);
+var defaults = __webpack_require__(4);
 
 /**
  * Create an instance of Axios
@@ -35551,9 +35578,9 @@ axios.create = function create(instanceConfig) {
 };
 
 // Expose Cancel & CancelToken
-axios.Cancel = __webpack_require__(11);
+axios.Cancel = __webpack_require__(13);
 axios.CancelToken = __webpack_require__(37);
-axios.isCancel = __webpack_require__(10);
+axios.isCancel = __webpack_require__(12);
 
 // Expose all/spread
 axios.all = function all(promises) {
@@ -35601,7 +35628,7 @@ function isSlowBuffer (obj) {
 "use strict";
 
 
-var defaults = __webpack_require__(3);
+var defaults = __webpack_require__(4);
 var utils = __webpack_require__(0);
 var InterceptorManager = __webpack_require__(32);
 var dispatchRequest = __webpack_require__(33);
@@ -35706,7 +35733,7 @@ module.exports = function normalizeHeaderName(headers, normalizedName) {
 "use strict";
 
 
-var createError = __webpack_require__(9);
+var createError = __webpack_require__(11);
 
 /**
  * Resolve or reject a Promise based on response status.
@@ -36139,8 +36166,8 @@ module.exports = InterceptorManager;
 
 var utils = __webpack_require__(0);
 var transformData = __webpack_require__(34);
-var isCancel = __webpack_require__(10);
-var defaults = __webpack_require__(3);
+var isCancel = __webpack_require__(12);
+var defaults = __webpack_require__(4);
 var isAbsoluteURL = __webpack_require__(35);
 var combineURLs = __webpack_require__(36);
 
@@ -36299,7 +36326,7 @@ module.exports = function combineURLs(baseURL, relativeURL) {
 "use strict";
 
 
-var Cancel = __webpack_require__(11);
+var Cancel = __webpack_require__(13);
 
 /**
  * A `CancelToken` is an object that can be used to request cancellation of an operation.
@@ -47617,7 +47644,7 @@ exports.clearImmediate = (typeof self !== "undefined" && self.clearImmediate) ||
     attachTo.clearImmediate = clearImmediate;
 }(typeof self === "undefined" ? typeof global === "undefined" ? this : global : self));
 
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(1), __webpack_require__(7)))
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(1), __webpack_require__(9)))
 
 /***/ }),
 /* 42 */
@@ -47765,7 +47792,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
 (function (root, factory) {
   if (true) {
     // AMD. Register as an anonymous module unless amdModuleId is set
-    !(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__(2)], __WEBPACK_AMD_DEFINE_RESULT__ = (function (a0) {
+    !(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__(3)], __WEBPACK_AMD_DEFINE_RESULT__ = (function (a0) {
       return (factory(a0));
     }).apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__),
 				__WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
@@ -50417,14 +50444,1966 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
 
 /***/ }),
 /* 44 */
+/***/ (function(module, exports) {
+
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
+
+/*
+ * jQuery Nestoria Slider
+ *
+ * Copyright 2014, Lokku Ltd.
+ * Free to use and abuse under the MIT license.
+ * http://www.opensource.org/licenses/mit-license.php
+ */
+(function ($) {
+    /* 
+     * These are used for user interaction. This plugin assumes the user can
+     * interact with one control at a time. For this reason it's safe to keep
+     * these global.
+     */
+    var _$current_slider;
+    var _is_mousedown;
+    var _original_mousex;
+
+    // both for keyboard and mouse interaction
+    var _is_left_grip;
+
+    // for keyboard interaction only
+    var _before_keydown_value;
+    var _before_keydown_pixel;
+    var _before_keyup_value;
+    var _before_keyup_pixel;
+
+    // a fixed configuration for the single bar slider, used to decide where to
+    // place the naked bar.
+    var _naked_bar_deltas; // see populateNakedBarDeltas
+
+    var _methods = {
+        /*
+         * This method must be called once during initialization.
+         * It sets the behaviour of the naked bar in case of one handle.
+         */
+        'setNakedBarDelta': function setNakedBarDelta(position, handleWidth) {
+            if (position === "stickToSides") {
+                _naked_bar_deltas = {
+                    toEndWidth: handleWidth,
+                    toBeginLeft: 0,
+                    toBeginWidth: handleWidth
+                };
+            } else if (position === "middle") {
+                // Position naked end of the bar at the middle value.
+                _naked_bar_deltas = {
+                    toEndWidth: handleWidth / 2,
+                    toBeginLeft: handleWidth / 2,
+                    toBeginWidth: handleWidth / 2
+                };
+            } else {
+                throw new Error('unknown position of setNakedBarDelta: ' + position);
+            }
+        },
+        'getSliderValuesAtPositionPx': function getSliderValuesAtPositionPx(leftPx, rightPx) {
+            var $this = this,
+                leftPxInValue,
+                rightPxInValue,
+                pixel_to_value_mapping_func = $this.data('pixel_to_value_mapping');
+
+            if (typeof pixel_to_value_mapping_func !== 'undefined') {
+                leftPxInValue = pixel_to_value_mapping_func(leftPx);
+                rightPxInValue = pixel_to_value_mapping_func(rightPx);
+            } else {
+                var w = _methods.getSliderWidthPx.call($this) - $this.data('left_grip_width');
+                leftPxInValue = _methods.inverse_rangemap_0_to_n.call($this, leftPx, w);
+                rightPxInValue = _methods.inverse_rangemap_0_to_n.call($this, rightPx, w);
+            }
+
+            return [leftPxInValue, rightPxInValue];
+        },
+        /*
+         *  Move slider grips to the specified position. This method is
+         *  designed to run within the user interaction lifecycle. Only call
+         *  this method if the user has interacted with the sliders
+         *  actually...
+         *
+         *  First the desired positions are validated. If values are ok, the
+         *  move is performed, otherwise it's just ignored because weird
+         *  values have been passed.
+         */
+        'validateAndMoveGripsToPx': function validateAndMoveGripsToPx(nextLeftGripPositionPx, nextRightGripPositionPx) {
+            var $this = this;
+
+            var draggableAreaLengthPx = _methods.getSliderWidthPx.call($this) - $this.data('left_grip_width');
+
+            //
+            // Validate & Move
+            //
+            if (nextRightGripPositionPx <= draggableAreaLengthPx && nextLeftGripPositionPx >= 0 && nextLeftGripPositionPx <= draggableAreaLengthPx && (!$this.data('has_right_grip') || nextLeftGripPositionPx <= nextRightGripPositionPx)) {
+
+                var prevMin = $this.data('cur_min'),
+                    prevMax = $this.data('cur_max');
+
+                // note: also stores new cur_min, cur_max
+                _methods.set_position_from_px.call($this, nextLeftGripPositionPx, nextRightGripPositionPx);
+
+                // set the style of the grips according to the highlighted range
+                _methods.refresh_grips_style.call($this);
+
+                _methods.notify_changed_implicit.call($this, 'drag_move', prevMin, prevMax);
+            }
+
+            return $this;
+        },
+        /*
+         * Update aria attributes of the slider based on the current
+         * configuration of the slider.
+         */
+        'updateAriaAttributes': function updateAriaAttributes() {
+            var $this = this,
+                settings = $this.data('settings'),
+                $leftGrip = $this.find(settings.left_grip_selector);
+
+            //
+            // double grips sliders is probably the most common case...
+            // ... also, the values to be set in the two cases are quite
+            // different.
+            //
+            if ($this.data('has_right_grip')) {
+
+                var $rightGrip = $this.find(settings.right_grip_selector);
+
+                //
+                // grips are mutually binding their max/min values when 2 grips
+                // are present. For example, we should imagine the left grip as
+                // being constrained between [ rangeMin, valueMax ]
+                //
+                $leftGrip.attr('aria-valuemin', $this.data('range_min')).attr('aria-valuenow', methods.get_current_min_value.call($this)).attr('aria-valuemax', methods.get_current_max_value.call($this));
+
+                $rightGrip.attr('aria-valuemin', methods.get_current_min_value.call($this)).attr('aria-valuenow', methods.get_current_max_value.call($this)).attr('aria-valuemax', $this.data('range_max'));
+            } else {
+                $leftGrip.attr('aria-valuemin', $this.data('range_min')).attr('aria-valuenow', methods.get_current_min_value.call($this)).attr('aria-valuemax', $this.data('range_max'));
+            }
+
+            return $this;
+        },
+        /*
+         * Return the width in pixels of the slider bar, i.e., the maximum
+         * number of pixels the user can slide the slider over. This function
+         * should always be used internally to obtain the width of the
+         * slider in pixels!
+         */
+        'getSliderWidthPx': function getSliderWidthPx() {
+            var $this = this;
+
+            //
+            // .width() can actually return a floating point number! see
+            // jquery docs!
+            //
+            return Math.round($this.width());
+        },
+        /*
+         * Return the position of a given grip in pixel in integer format.
+         * Use this method internally if you are literally going to get the
+         * left CSS property from the provided grip.
+         *
+         * This method assumes a certain grip exists and will have the left
+         * property.
+         *
+         * This is generally safe for the left grip, because it is basically
+         * guaranteed to exist. But for the right grip you should be really
+         * using getRightGripPositionPx instead.
+         *
+         */
+        'getGripPositionPx': function getGripPositionPx($grip) {
+            return parseInt($grip.css('left').replace('px', ''), 10);
+        },
+        /*
+         * Just the same as getGripPositionPx, but there is no need to provide
+         * the $slider.
+         */
+        'getLeftGripPositionPx': function getLeftGripPositionPx() {
+            var $this = this,
+                settings = $this.data('settings'),
+                $leftGrip = $this.find(settings.left_grip_selector);
+
+            return _methods.getGripPositionPx.call($this, $leftGrip);
+        },
+        /*
+         * Return the position of the right Grip if it exists or return the
+         * current position if not. Even if the right grip doesn't exist, its
+         * position should be defined, as it determines the position of the 
+         * bar.
+         */
+        'getRightGripPositionPx': function getRightGripPositionPx() {
+            var $this = this,
+                settings = $this.data('settings');
+
+            if ($this.data('has_right_grip')) {
+                return _methods.getGripPositionPx.call($this, $this.find(settings.right_grip_selector));
+            }
+
+            // default
+            var sliderWidthPx = _methods.getSliderWidthPx.call($this) - $this.data('left_grip_width');
+            return _methods.rangemap_0_to_n.call($this, $this.data('cur_max'), sliderWidthPx);
+        },
+        /*
+         * Return the width of the left grip.  Like getSliderWidthPx, this
+         * method deals with .width() returning a floating point number. All
+         * the code in this plugin assumes an integer here!
+         */
+        'getLeftGripWidth': function getLeftGripWidth() {
+            var $this = this,
+                settings = $this.data('settings'),
+                $leftGrip = $this.find(settings.left_grip_selector);
+
+            return Math.round($leftGrip.outerWidth());
+        },
+        /*
+         * Return the width of the right grip. The calling method should
+         * check that the right grip actually exists. This method assumes it
+         * does.
+         */
+        'getRightGripWidth': function getRightGripWidth() {
+            var $this = this,
+                settings = $this.data('settings'),
+                $rightGrip = $this.find(settings.right_grip_selector);
+
+            return Math.round($rightGrip.outerWidth());
+        },
+        'binarySearchValueToPxCompareFunc': function binarySearchValueToPxCompareFunc(s, a, i) {
+            // Must return:
+            //
+            // s: element to search for
+            // a: array we are looking in 
+            // i: position of the element we are looking for
+            //
+            // -1 (s < a[i])
+            // 0  found (= a[i])
+            // 1  (s > a[i])
+            if (s === a[i]) {
+                return 0;
+            } // element found exactly
+            if (s < a[i] && i === 0) {
+                return 0;
+            } // left extreme case e.g., a = [ 3, ... ], s = 1
+            if (a[i - 1] <= s && s < a[i]) {
+                return 0;
+            } // s is between two elements, always return the rightmost
+            if (s > a[i]) {
+                return 1;
+            }
+            if (s <= a[i - 1]) {
+                return -1;
+            }
+            $.error('cannot compare s: ' + s + ' with a[' + i + ']. a is: ' + a.join(','));
+        },
+        /*
+         * Perform binary search to find searchElement into a generic array.
+         * It uses a customized compareFunc to perform the comparison between
+         * two elements of the array and a getElement function to pick the
+         * element from the array (e.g., in case we want to pick a field of an
+         * array of objects)
+         */
+        'binarySearch': function binarySearch(array, searchElement, getElementFunc, compareFunc) {
+            var minIndex = 0;
+            var maxIndex = array.length - 1;
+            var currentIndex;
+            var currentElement;
+
+            while (minIndex <= maxIndex) {
+                currentIndex = (minIndex + maxIndex) / 2 | 0;
+                currentElement = getElementFunc(array, currentIndex);
+
+                // lt = -1 (searchElement < currentElement)
+                // eq = 0 
+                // gt = 1  (searchElement > currentElement)
+                var lt_eq_gt = compareFunc(searchElement, array, currentIndex);
+
+                if (lt_eq_gt > 0) {
+                    minIndex = currentIndex + 1;
+                } else if (lt_eq_gt < 0) {
+                    maxIndex = currentIndex - 1;
+                } else {
+                    return currentIndex;
+                }
+            }
+
+            return -1;
+        },
+        /*
+         * Returns true if this slider has limit, false otherwise. There can be
+         * an upper limit and a lower limit for the sliders.
+         * The lower/upper limits are values that are out of the slider range,
+         * but that can be selected by the user when he moves a slider all the
+         * way down the minimum and up to the maximum value.
+         */
+        'haveLimits': function haveLimits() {
+            var $this = this,
+                lowerLimit = $this.data('lower-limit'),
+                upperLimit = $this.data('upper-limit'),
+                haveLimits = false;
+
+            if (typeof lowerLimit !== 'undefined' && typeof upperLimit !== 'undefined') {
+
+                haveLimits = true;
+            }
+
+            return haveLimits;
+        },
+        /*
+         * This method is called whenever the style of the grips needs to get
+         * updated.
+         */
+        'refresh_grips_style': function refresh_grips_style() {
+            var $this = this,
+                settings = $this.data('settings');
+
+            // Skip refreshing grips style if no hihglight is specified in
+            // construction
+            if (typeof settings.highlight === 'undefined') {
+                return;
+            }
+
+            var highlightedRangeMin = $this.data('highlightedRangeMin');
+
+            if (typeof highlightedRangeMin === 'undefined') {
+                return;
+            }
+
+            var $leftGrip = $this.find(settings.left_grip_selector),
+                $rightGrip = $this.find(settings.right_grip_selector),
+                highlightedRangeMax = $this.data('highlightedRangeMax'),
+                curMin = $this.data('cur_min'),
+                curMax = $this.data('cur_max'),
+                highlightGripClass = settings.highlight.grip_class;
+
+            // curmin is within the highlighted range
+            if (curMin < highlightedRangeMin || curMin > highlightedRangeMax) {
+                // de-highlight grip
+                $leftGrip.removeClass(highlightGripClass);
+            } else {
+                // highlight grip
+                $leftGrip.addClass(highlightGripClass);
+            }
+
+            // time to highlight right grip
+            if (curMax < highlightedRangeMin || curMax > highlightedRangeMax) {
+                // de-highlight grip
+                $rightGrip.removeClass(highlightGripClass);
+            } else {
+                // highlight grip
+                $rightGrip.addClass(highlightGripClass);
+            }
+        },
+        /* 
+         *  Set left and right handle at the right position on the screen (pixels) 
+         *  given the desired position in currency.
+         * 
+         *  e.g., _methods.set_position_from_val.call($this, 10000, 100000);
+         *        
+         *        may set the left handle at 100px and the right handle at
+         *        200px;
+         *   
+         */
+        'set_position_from_val': function set_position_from_val(cur_min, cur_max) {
+            var $this = this;
+            // 
+            // We need to understand how much pixels cur_min and cur_max
+            // correspond.
+            //
+            var range_min = $this.data('range_min'),
+                range_max = $this.data('range_max');
+
+            //
+            // (safety) constrain the cur_min or the cur_max value between the
+            // max/min ranges allowed for this slider.
+            //
+            if (cur_min < range_min) {
+                cur_min = range_min;
+            }
+            if (cur_min > range_max) {
+                cur_min = range_max;
+            }
+
+            if ($this.data('has_right_grip')) {
+                if (cur_max > range_max) {
+                    cur_max = range_max;
+                }
+                if (cur_max < range_min) {
+                    cur_max = range_min;
+                }
+            } else {
+                cur_max = $this.data('cur_max');
+            }
+
+            var leftPx = methods.value_to_px.call($this, cur_min),
+                rightPx = methods.value_to_px.call($this, cur_max);
+
+            _methods.set_handles_at_px.call($this, leftPx, rightPx);
+
+            // save this position
+            $this.data('cur_min', cur_min);
+
+            if ($this.data('has_right_grip')) {
+                $this.data('cur_max', cur_max);
+            }
+
+            return $this;
+        },
+        /*
+         * Set the position of the handles at the specified pixel points (taking
+         * the whole slider width as a maximum point).
+         */
+        'set_position_from_px': function set_position_from_px(leftPx, rightPx) {
+            var $this = this;
+
+            //
+            // we need to find a value from the given value in pixels
+            //
+
+            // now set the position as requested...
+            _methods.set_handles_at_px.call($this, leftPx, rightPx);
+
+            var valueLeftRight = _methods.getSliderValuesAtPositionPx.call($this, leftPx, rightPx),
+                leftPxInValue = valueLeftRight[0],
+                rightPxInValue = valueLeftRight[1];
+
+            // ... and save the one we've found.
+            $this.data('cur_min', leftPxInValue);
+
+            if ($this.data('has_right_grip')) {
+                $this.data('cur_max', rightPxInValue);
+            }
+
+            return $this;
+        },
+        /*
+         * Updates the CSS of grips and bar so that the left grip appears at
+         * leftPx and the right grip appears at rightPx. Note: leftPx can be >
+         * rightPx.
+         */
+        'set_handles_at_px': function set_handles_at_px(leftPx, rightPx) {
+            var $this = this;
+            var settings = $this.data('settings');
+
+            var left_grip_selector = settings.left_grip_selector,
+                right_grip_selector = settings.right_grip_selector,
+                value_bar_selector = settings.value_bar_selector;
+
+            var handleWidth = $this.data('left_grip_width');
+
+            // The left grip
+            $this.find(left_grip_selector).css('left', leftPx + 'px');
+
+            // The right grip
+            $this.find(right_grip_selector).css('left', rightPx + 'px');
+
+            // The value bar
+            if ($this.data('has_right_grip')) {
+                // If both the grips are there, the value bar must stick to
+                // beginning and the end of the grips. 
+                $this.find(value_bar_selector).css('left', leftPx + 'px').css('width', rightPx - leftPx + handleWidth + 'px');
+            } else {
+                if (!_naked_bar_deltas) {
+                    _methods.populateNakedBarDeltas.call($this, leftPx, rightPx, handleWidth);
+                }
+
+                if (rightPx > leftPx) {
+                    // The naked end of the bar is on the right of the grip
+                    $this.find(value_bar_selector).css('left', leftPx + 'px').css('width', rightPx - leftPx + _naked_bar_deltas.toEndWidth + 'px');
+                } else {
+                    // The naked end of the bar is on the left of the grip
+                    // NOTE: leftPx and rightPx are to be read swapped here.
+                    $this.find(value_bar_selector).css('left', rightPx + _naked_bar_deltas.toBeginLeft + 'px').css('width', leftPx - rightPx + _naked_bar_deltas.toBeginWidth + 'px');
+                }
+            }
+
+            return $this;
+        },
+        'drag_start_func_touch': function drag_start_func_touch(e, settings, $left_grip, $right_grip, is_touch) {
+            var $this = this,
+                original_event = e.originalEvent,
+                touch = original_event.touches[0];
+
+            // for touch devices we need to make sure we allow the user to scroll
+            // if the click was too far from the slider.
+            var curY = touch.pageY,
+                curX = touch.pageX;
+
+            // is the user allowed to grab if he/she tapped too far from the
+            // slider?
+            var ydelta = Math.abs($this.offset().top - curY),
+                slider_left = $this.offset().left,
+                xldelta = slider_left - curX,
+                xrdelta = curX - (slider_left + $this.width());
+
+            if (ydelta > settings.touch_tolerance_value_bar_y || xldelta > settings.touch_tolerance_value_bar_x || xrdelta > settings.touch_tolerance_value_bar_x) {
+
+                return;
+            }
+
+            original_event.preventDefault();
+            _original_mousex = touch.pageX;
+
+            // true : is touch event
+            _methods.drag_start_func.call($this, touch, settings, $left_grip, $right_grip, is_touch);
+        },
+        'drag_start_func': function drag_start_func(e, settings, $leftGrip, $rightGrip, is_touch) {
+
+            var $this = this;
+
+            $this.find(settings.left_grip_selector + ',' + settings.value_bar_selector + ',' + settings.right_grip_selector).removeClass(settings.animating_css_class);
+
+            if (!methods.is_enabled.call($this)) {
+                return;
+            }
+
+            //
+            // if the user used the finger, he/she is allowed to touch anywhere.
+            // but if the mouse is used, we want to enable the logic only for
+            // left grip, right grip, bar/panel elements.
+            //
+            var $target = $(e.target);
+
+            // ... if the highlight range was enabled we should check wether
+            // the user has tapped or clicked the highlight panel...
+            var targetIsPanelSelector = false;
+            if (_typeof(settings.highlight) === 'object') {
+                targetIsPanelSelector = $target.is(settings.highlight.panel_selector);
+            }
+
+            if (is_touch === false && !$target.is(settings.left_grip_selector) && !$target.is(settings.right_grip_selector) && !$target.is(settings.value_bar_selector) && !targetIsPanelSelector && !$target.is($this)) {
+
+                return;
+            }
+
+            // - - - -
+            // the following logic finds the nearest slider grip and starts
+            // dragging it.
+            // - - - -
+
+            _$current_slider = $this;
+
+            var leftGripPositionPx = _methods.getGripPositionPx.call($this, $leftGrip),
+                sliderWidthPx = _methods.getSliderWidthPx.call($this) - $this.data('left_grip_width'),
+                lleft = $leftGrip.offset().left,
+                rleft,
+                // don't compute this yet (maybe not needed if 1 grip)
+            curX,
+                ldist,
+                rdist,
+                ldelta,
+                rdelta;
+
+            var rightGripPositionPx = _methods.getRightGripPositionPx.call($this);
+
+            //
+            // We need to do as if the click happened a bit more on the left.
+            // That's because we will be setting the left CSS property at the
+            // point where the click happened, meaning the slider grip will be
+            // spanning to the right.
+            //
+            curX = Math.round(e.pageX) - $this.data('left_grip_width') / 2;
+
+            // calculate deltas from left and right grip
+            ldist = Math.abs(lleft - curX);
+            ldelta = curX - lleft;
+
+            if ($this.data('has_right_grip')) {
+                rleft = $rightGrip.offset().left;
+                rdist = Math.abs(rleft - curX);
+                rdelta = curX - rleft;
+            } else {
+                // no right grip... we make the right slider
+                // unreachable!
+                rdist = ldist * 2;
+                rdelta = ldelta * 2;
+            }
+
+            // notify the beginning of a dragging...
+            settings.user_drag_start_callback.call($this, e);
+
+            if (ldist === rdist) {
+
+                if (curX < lleft) {
+                    // move the left grip
+                    leftGripPositionPx += ldelta;
+                    _is_left_grip = true;
+                } else {
+                    // move the right grip
+                    rightGripPositionPx += rdelta;
+                    _is_left_grip = false;
+                }
+            } else if (ldist < rdist) {
+
+                // move the left grip
+                leftGripPositionPx += ldelta;
+                _is_left_grip = true;
+            } else {
+                // move the right grip
+                rightGripPositionPx += rdelta;
+                _is_left_grip = false;
+            }
+
+            //
+            // Limit the right grip to the maximum allowed - as the user can
+            // actually click beyond it!
+            //
+            // ...............
+            //               ^-- maximum clickable
+            //              ^--- maximum allowed (i.e., sliderWidth - gripWidth)
+            //
+            // if user clicks at sliderWidth, we will be setting CSS left of
+            // right handle having:
+            //
+            // ...............R  <-- out of bound :-(
+            //               ^-- maximum clickable
+            //              ^--- maximum allowed (i.e., sliderWidth - gripWidth)
+            //
+            // but we want:
+            //
+            // ..............R <-- within bound :-)
+            //               ^-- maximum clickable
+            //              ^--- maximum allowed (i.e., sliderWidth - gripWidth)
+            //
+            // Hence we limit.
+            //
+
+            if ($this.data('has_right_grip')) {
+                // here we check the right handle only, because it should
+                // always be the one that gets moved if the user clicks towards
+                // the right extremity!
+                if (rightGripPositionPx > sliderWidthPx) {
+                    rightGripPositionPx = sliderWidthPx;
+                }
+            } else {
+                // in case we have one handle only, we will be moving the left
+                // handle instead of the right one... hence we need to perform
+                // this check on the left handle as well!
+                if (leftGripPositionPx > sliderWidthPx) {
+                    leftGripPositionPx = sliderWidthPx;
+                }
+            }
+
+            // this can happen because the user can click on the left handle!
+            // (which is out of the left boundary)
+            if (leftGripPositionPx < 0) {
+                leftGripPositionPx = 0;
+            }
+
+            _is_mousedown = true;
+
+            var prev_min = $this.data('cur_min'),
+                prev_max = $this.data('cur_max');
+
+            _methods.set_position_from_px.call($this, leftGripPositionPx, rightGripPositionPx);
+
+            // set the style of the grips according to the highlighted range
+            _methods.refresh_grips_style.call($this);
+
+            _methods.notify_changed_implicit.call($this, 'drag_start', prev_min, prev_max);
+
+            // no need to call preventDefault on touch events, as we called
+            // preventDefault on the original event already
+            if (Object.prototype.toString.apply(e) !== "[object Touch]") {
+                e.preventDefault();
+            }
+        },
+        'drag_move_func_touch': function drag_move_func_touch(e) {
+            if (_is_mousedown === true) {
+                var original_event = e.originalEvent;
+                original_event.preventDefault();
+                var touch = original_event.touches[0];
+                _methods.drag_move_func(touch);
+            }
+        },
+        'drag_move_func': function drag_move_func(e) {
+            if (_is_mousedown) {
+                // our slider element.
+                var $this = _$current_slider,
+                    settings = $this.data('settings'),
+                    sliderWidthPx = _methods.getSliderWidthPx.call($this) - $this.data('left_grip_width'),
+                    leftGripPositionPx = _methods.getLeftGripPositionPx.call($this);
+
+                var rightGripPositionPx = _methods.getRightGripPositionPx.call($this);
+
+                //
+                // Here we are going to set the position in pixels based on
+                // where the user has moved the mouse cursor. We obtain the
+                // position of the mouse cursors via e.pageX, which returns the
+                // absolute position of the mouse on the screen.
+                //
+                var absoluteMousePosition = Math.round(e.pageX);
+
+                //
+                // Compute the delta (in px) for the slider movement. It is the
+                // difference between the new position of the cursor and the
+                // old position of the cursor.
+                //
+                // Based on the delta we decide how to move the dragged handle.
+                //
+                // 0 : no movement
+                // -delta: move left
+                // +delta: move right
+                //
+                var delta = absoluteMousePosition - _original_mousex;
+
+                //
+                // User cannot drag the handles outside the slider bar area.
+                //
+
+                // 1) calculate the area within which the movement is
+                //    considered to be valid.
+                var half_a_grip_width = $this.data('left_grip_width') / 2,
+                    drag_area_start = $this.offset().left + $this.data('left_grip_width') - half_a_grip_width,
+                    drag_area_end = drag_area_start + sliderWidthPx;
+
+                if (settings.crossable_handles === false && $this.data('has_right_grip')) {
+                    // if handles are not crossable, we should define the left
+                    // and the right boundary of the movement.
+                    if (_is_left_grip) {
+                        drag_area_end = drag_area_start + rightGripPositionPx;
+                    } else {
+                        drag_area_start = drag_area_start + leftGripPositionPx;
+                    }
+                }
+
+                // 2) by default we accept to move the slider according to both
+                // the deltas (i.e., left or right)
+                var ignore_positive_delta = 0,
+                    ignore_negative_delta = 0;
+
+                // 3) but if the user is moving the mouse beyond the draggable
+                // area, we should only accept a movement in one direction.
+                if (absoluteMousePosition < drag_area_start) {
+                    ignore_positive_delta = 1;
+                    ignore_negative_delta = 0;
+                }
+                if (absoluteMousePosition > drag_area_end) {
+                    ignore_negative_delta = 1;
+                    ignore_positive_delta = 0;
+                }
+
+                //
+                // Here we decide whether to invert the grip being moved.
+                //
+                if (settings.crossable_handles === true && $this.data('has_right_grip')) {
+
+                    if (_is_left_grip) {
+
+                        // ... if we are using the left grip
+                        if (rightGripPositionPx <= sliderWidthPx) {
+
+                            // the inversion logic should only be active when the
+                            // slider is not at the extremity
+                            if (leftGripPositionPx + delta > rightGripPositionPx) {
+
+                                _is_left_grip = false;
+
+                                // TWEAK: keep the position of the left handle fixed
+                                // at the one of the right handle as the user may
+                                // have moved the mouse too fast, thus giving
+                                // leftGripPositionPx > rightGripPositionPx.
+                                //
+                                // Basically here we avoid:
+                                // 
+                                // Initial State:
+                                //
+                                // ------L-R------  (leftGripPositionPx < rightGripPositionPx)
+                                //
+                                // Fast Mouse Move:
+                                //
+                                // --------R--L---  (leftGripPositionPx + delta)
+                                // --------R-L----  (leftGripPositionPx [ still > rightGripPositionPx! ])
+                                //
+                                // _is_left_grip becomes false (this code)
+                                // 
+                                leftGripPositionPx = rightGripPositionPx;
+                            }
+                        }
+                    } else {
+                        // ... converse logic
+                        if (leftGripPositionPx >= 0) {
+                            if (rightGripPositionPx + delta < leftGripPositionPx) {
+
+                                // current_max = current_min;
+                                _is_left_grip = true;
+
+                                rightGripPositionPx = leftGripPositionPx;
+                            }
+                        }
+                    }
+                }
+
+                //
+                // Decide the position of the new handles.
+                //
+                var nextLeftGripPositionPx = leftGripPositionPx,
+                    nextRightGripPositionPx = rightGripPositionPx;
+
+                if (delta > 0 && !ignore_positive_delta || delta < 0 && !ignore_negative_delta) {
+
+                    if (_is_left_grip) {
+                        nextLeftGripPositionPx += delta;
+                    } else {
+                        nextRightGripPositionPx += delta;
+                    }
+                }
+
+                _methods.validateAndMoveGripsToPx.call($this, nextLeftGripPositionPx, nextRightGripPositionPx);
+
+                // prepare for next movement
+                _original_mousex = absoluteMousePosition;
+
+                // no need to call preventDefault on touch events, as we called
+                // preventDefault on the original event already
+                if (Object.prototype.toString.apply(e) !== "[object Touch]") {
+                    e.preventDefault();
+                }
+            }
+        },
+        'drag_end_func_touch': function drag_end_func_touch(e) {
+            var original_event = e.originalEvent;
+            original_event.preventDefault();
+            var touch = original_event.touches[0];
+            _methods.drag_end_func(touch);
+        },
+        'drag_end_func': function drag_end_func() /* e */{
+            var $this = _$current_slider;
+            if (typeof $this !== 'undefined') {
+                _is_mousedown = false;
+                _original_mousex = undefined;
+
+                _methods.notify_mouse_up_implicit.call($this, _is_left_grip);
+
+                // require another click on a handler before going into here again!
+                _$current_slider = undefined;
+
+                // put back the class once user finished dragging
+                var settings = $this.data('settings');
+                $this.find(settings.left_grip_selector + ',' + settings.value_bar_selector + ',' + settings.right_grip_selector).addClass(settings.animating_css_class);
+            }
+        },
+        'get_rounding_for_value': function get_rounding_for_value(v) {
+            var $this = this;
+            var rounding = $this.data('rounding');
+            var rounding_ranges = $this.data('rounding_ranges');
+
+            if ((typeof rounding_ranges === "undefined" ? "undefined" : _typeof(rounding_ranges)) === 'object') {
+
+                // then it means the rounding is not fixed, we should find the
+                // value in the roundings_array.
+                var roundingIdx = _methods.binarySearch.call($this, rounding_ranges, v,
+                // pick an element from the array
+                function (array, index) {
+                    return array[index].range;
+                },
+
+                // compare search element with current element
+                // < 0 search < current
+                // 0   equals
+                // > 0 search > current
+                function (search, array, currentIdx) {
+
+                    // first check if this is our element
+
+                    // this is our element if the search value is:
+                    if (search < array[currentIdx].range) {
+
+                        // we can have a match or search in the left half
+                        if (currentIdx > 0) {
+                            if (search >= array[currentIdx - 1].range) {
+                                return 0;
+                            } else {
+                                // go left
+                                return -1;
+                            }
+                        } else {
+                            return 0;
+                        }
+                    } else {
+                        // we must search in the next half
+                        return 1;
+                    }
+                });
+
+                rounding = 1;
+                if (roundingIdx > -1) {
+                    rounding = parseInt(rounding_ranges[roundingIdx].value, 10);
+                } else {
+                    var lastIdx = rounding_ranges.length - 1;
+                    if (v >= rounding_ranges[lastIdx].range) {
+                        rounding = rounding_ranges[lastIdx].value;
+                    }
+                }
+            }
+            return rounding;
+        },
+        /*
+         * Calls the user mouseup callback with the right parameters. Relies on
+         * $data('beforestart_min/max') in addition to the isLeftGrip parameter.
+         *
+         * NOTE: saves the new beforestart_min and begforestart_max as well.
+         */
+        'notify_mouse_up_implicit': function notify_mouse_up_implicit(isLeftGrip) {
+            var $this = this,
+                current_min_value = methods.get_current_min_value.call($this),
+                current_max_value = methods.get_current_max_value.call($this),
+                didValuesChange = false;
+
+            // check if we changed.
+            if ($this.data('beforestart_min') !== current_min_value || $this.data('beforestart_max') !== current_max_value) {
+                // values have changed!
+                didValuesChange = true;
+
+                // save the new values
+                $this.data('beforestart_min', current_min_value);
+                $this.data('beforestart_max', current_max_value);
+            }
+
+            var settings = $this.data('settings');
+
+            settings.user_mouseup_callback.call($this, methods.get_current_min_value.call($this), methods.get_current_max_value.call($this), isLeftGrip, didValuesChange);
+
+            return $this;
+        },
+        /*
+         * NOTE: this method may take the previous min/max value as input.
+         *       if no arguments are provided the method blindly notifies.
+         */
+        'notify_changed_implicit': function notify_changed_implicit(cause, prevMin, prevMax) {
+            var $this = this;
+
+            var force = false;
+            if (cause === 'init' || cause === 'refresh') {
+                force = true;
+            }
+
+            var curMin = methods.get_current_min_value.call($this),
+                curMax = methods.get_current_max_value.call($this);
+
+            if (!force) {
+                prevMin = methods.round_value_according_to_rounding.call($this, prevMin);
+                prevMax = methods.round_value_according_to_rounding.call($this, prevMax);
+            }
+
+            if (force || curMin !== prevMin || curMax !== prevMax) {
+
+                _methods.notify_changed_explicit.call($this, cause, prevMin, prevMax, curMin, curMax);
+
+                force = 1;
+            }
+
+            return force;
+        },
+        'notify_changed_explicit': function notify_changed_explicit(cause, prevMin, prevMax, curMin, curMax) {
+            var $this = this,
+                settings = $this.data('settings');
+
+            // maybe update aria attributes for accessibility
+            if ($this.data('aria_enabled')) {
+                _methods.updateAriaAttributes.call($this);
+            }
+
+            settings.value_changed_callback.call($this, cause, curMin, curMax, prevMin, prevMax);
+
+            return $this;
+        },
+        'validate_params': function validate_params(settings) {
+            var $this = this;
+            var min_value = $this.data('range_min'),
+                max_value = $this.data('range_max'),
+                cur_min = $this.data('cur_min'),
+                lower_limit = $this.data('lower-limit'),
+                upper_limit = $this.data('upper-limit');
+
+            var have_limits = _methods.haveLimits.call($this);
+
+            if (typeof min_value === 'undefined') {
+                $.error("the data-range_min attribute was not defined");
+            }
+            if (typeof max_value === 'undefined') {
+                $.error("the data-range_max attribute was not defined");
+            }
+            if (typeof cur_min === 'undefined') {
+                $.error("the data-cur_min attribute must be defined");
+            }
+            if (min_value > max_value) {
+                $.error("Invalid input parameter. must be min < max");
+            }
+
+            if (have_limits && lower_limit > upper_limit) {
+                $.error('Invalid data-lower-limit or data-upper-limit');
+            }
+            if ($this.find(settings.left_grip_selector).length === 0) {
+                $.error("Cannot find element pointed by left_grip_selector: " + settings.left_grip_selector);
+            }
+            /* 
+             * NOTE: only validate right grip selector if it is not
+             * undefined otherwise just assume that if it isn't
+             * found isn't there. This is because we initialize the
+             * slider at once and let the markup decide if the
+             * slider is there or not.
+             */
+            if (typeof settings.right_grip_selector !== 'undefined') {
+                if ($this.find(settings.right_grip_selector).length === 0) {
+                    $.error("Cannot find element pointed by right_grip_selector: " + settings.right_grip_selector);
+                }
+            }
+
+            // same thing for the value bar selector
+            if (typeof settings.value_bar_selector !== 'undefined') {
+                if ($this.find(settings.value_bar_selector).length === 0) {
+                    $.error("Cannot find element pointed by value_bar_selector" + settings.value_bar_selector);
+                }
+            }
+        },
+        /*
+         * Maps a value between [minRange -- maxRange] into [0 -- n].
+         * The target range will be an integer number.
+         */
+        'rangemap_0_to_n': function rangemap_0_to_n(val, n) {
+            var $this = this;
+            var rangeMin = $this.data('range_min');
+            var rangeMax = $this.data('range_max');
+
+            if (val <= rangeMin) {
+                return 0;
+            }
+            if (val >= rangeMax) {
+                return n;
+            }
+
+            return Math.floor((n * val - n * rangeMin) / (rangeMax - rangeMin));
+        },
+        /*
+         * Maps a value between [0 -- max] back into [minRange -- maxRange].
+         * The target range can be a floating point number.
+         */
+        'inverse_rangemap_0_to_n': function inverse_rangemap_0_to_n(val, max) {
+            var $this = this;
+            var rangeMin = $this.data('range_min');
+            var rangeMax = $this.data('range_max');
+
+            if (val <= 0) {
+                return rangeMin;
+            }
+            if (val >= max) {
+                return rangeMax;
+            }
+
+            //
+            // To do this we first map 0 -- max relatively withing [minRange
+            // and maxRange], that is between [0 and (maxRange-minRange)].
+            //
+            var relativeMapping = (rangeMax - rangeMin) * val / max;
+
+            // ... then we bring this to the actual value by adding rangeMin.
+            return relativeMapping + rangeMin;
+        }
+
+    };
+    var methods = {
+        '_m': function _m(m) {
+            return _methods[m];
+        }, // for test, removed by Grunt
+        'teardown': function teardown() {
+            var $this = this;
+
+            // remove all data set with .data()
+            $this.removeData();
+
+            // unbind the document as well
+            $(document).unbind('mousemove.nstSlider').unbind('mouseup.nstSlider');
+
+            // unbind events bound to the container element
+            $this.parent().unbind('mousedown.nstSlider').unbind('touchstart.nstSlider').unbind('touchmove.nstSlider').unbind('touchend.nstSlider');
+
+            // unbind events bound to the current element
+            $this.unbind('keydown.nstSlider').unbind('keyup.nstSlider');
+
+            return $this;
+        },
+        'init': function init(options) {
+            var settings = $.extend({
+                'animating_css_class': 'nst-animating',
+                // this is the distance from the value bar by which we should
+                // grab the left or the right handler.
+                'touch_tolerance_value_bar_y': 30, // px
+                'touch_tolerance_value_bar_x': 15, // px
+                // where is the left grip?
+                'left_grip_selector': '.nst-slider-grip-left',
+                // where is the right grip?
+                // undefined = (only left grip bar)
+                'right_grip_selector': undefined,
+
+                // Specify highlight like this if you want to highlight a range
+                // in the slider.
+                //
+                // 'highlight' : {
+                //     'grip_class' : '.nsti-slider-hi',
+                //     'panel_selector' : '.nst-slider-highlight-panel'
+                // },
+                'highlight': undefined,
+
+                // Lets you specify the increment rounding for the slider handles
+                // for when the user moves them.
+                // It can be a string, indicating a fixed increment, or an object
+                // indicating the increment based on the value to be rounded.
+                //
+                // This can be specified in the following form: {
+                //    '1' : '100',    
+                //    '10' : '1000',  /* rounding = 10 for values in [100-999] */
+                //    '50' : '10000',
+                // }
+                'rounding': undefined,
+
+                // if the bar is not wanted
+                'value_bar_selector': undefined,
+
+                // Allow handles to cross each other while one of them is being
+                // dragged. This option is ignored if just one handle is used.
+                'crossable_handles': true,
+
+                'value_changed_callback': function value_changed_callback() /*cause, vmin, vmax*/{
+                    return;
+                },
+                'user_mouseup_callback': function user_mouseup_callback() /*vmin, vmax, left_grip_moved*/{
+                    return;
+                },
+                'user_drag_start_callback': function user_drag_start_callback() {
+                    return;
+                }
+            }, options);
+
+            //
+            // we need to unbind events attached to the document,
+            // as if we replace html elements and re-initialize, we
+            // don't want to double-bind events!
+            //
+            var $document = $(document);
+
+            // make sure only one event is bound to the document
+            $document.unbind('mouseup.nstSlider');
+            $document.unbind('mousemove.nstSlider');
+
+            $document.bind('mousemove.nstSlider', _methods.drag_move_func);
+            $document.bind('mouseup.nstSlider', _methods.drag_end_func);
+
+            return this.each(function () {
+                //
+                // $this is like:
+                //
+                // <div class="outer-slider" data-... data-...>
+                //     <div class="bar"></div>
+                //     <div class="leftGrip"></div>
+                //     <div class="rightGrip"></div>
+                // </div>
+                //
+                // It is supposed to be enclosed in a container
+                //
+                var $this = $(this),
+                    $container = $this.parent();
+
+                // enable: the user is able to move the grips of this slider.
+                $this.data('enabled', true);
+
+                // fix some values first
+                var rangeMin = $this.data('range_min'),
+                    rangeMax = $this.data('range_max'),
+                    valueMin = $this.data('cur_min'),
+                    valueMax = $this.data('cur_max');
+
+                // assume 0 if valueMax is not specified
+                if (typeof valueMax === 'undefined') {
+                    valueMax = valueMin;
+                }
+
+                if (rangeMin === '') {
+                    rangeMin = 0;
+                }
+                if (rangeMax === '') {
+                    rangeMax = 0;
+                }
+                if (valueMin === '') {
+                    valueMin = 0;
+                }
+                if (valueMax === '') {
+                    valueMax = 0;
+                }
+
+                $this.data('range_min', rangeMin);
+                $this.data('range_max', rangeMax);
+                $this.data('cur_min', valueMin);
+                $this.data('cur_max', valueMax);
+
+                // halt on error
+                _methods.validate_params.call($this, settings);
+
+                $this.data('settings', settings);
+
+                // override rounding from markup if defined in configuration
+                if (typeof settings.rounding !== 'undefined') {
+                    methods.set_rounding.call($this, settings.rounding);
+                } else if (typeof $this.data('rounding') !== 'undefined') {
+                    methods.set_rounding.call($this, $this.data('rounding'));
+                } else {
+                    methods.set_rounding.call($this, 1);
+                }
+
+                var left_grip = $this.find(settings.left_grip_selector)[0],
+                    $left_grip = $(left_grip),
+                    $right_grip = $($this.find(settings.right_grip_selector)[0]);
+
+                // make sure left grip can be tabbed if the user hasn't
+                // defined their own tab index
+                if (typeof $left_grip.attr('tabindex') === 'undefined') {
+                    $left_grip.attr('tabindex', 0);
+                }
+
+                // no right handler means single handler
+                var has_right_grip = false;
+                if ($this.find(settings.right_grip_selector).length > 0) {
+                    has_right_grip = true;
+
+                    // make sure right grip can be tabbed if the user hasn't
+                    // defined their own tab index
+                    if (typeof $right_grip.attr('tabindex') === 'undefined') {
+                        $right_grip.attr('tabindex', 0);
+                    }
+                }
+                $this.data('has_right_grip', has_right_grip);
+
+                // enable aria attributes update?
+                if ($this.data('aria_enabled') === true) {
+                    // setup aria role attributes on each grip
+                    $left_grip.attr('role', 'slider').attr('aria-disabled', 'false');
+
+                    if (has_right_grip) {
+                        $right_grip.attr('role', 'slider').attr('aria-disabled', 'false');
+                    }
+                }
+
+                //
+                // deal with keypresses here
+                //
+                $this.bind('keyup.nstSlider', function (e) {
+                    if ($this.data('enabled')) {
+                        switch (e.which) {
+                            case 37: // left
+                            case 38: // up
+                            case 39: // right 
+                            case 40:
+                                // down
+
+                                if (_before_keydown_value === _before_keyup_value) {
+
+                                    // we should search for the next value change...
+                                    // ... in which direction? depends on whe
+
+                                    var searchUntil = _methods.getSliderWidthPx.call($this),
+                                        val,
+                                        i,
+                                        setAtPixel;
+
+                                    if (_before_keydown_pixel - _before_keyup_pixel < 0) {
+                                        // the grip was moved towards the right
+
+                                        for (i = _before_keyup_pixel; i <= searchUntil; i++) {
+                                            // if the value at pixel i is different than
+                                            // the current value then we are good to go.
+                                            //
+                                            val = methods.round_value_according_to_rounding.call($this, _methods.getSliderValuesAtPositionPx.call($this, i, i)[1]);
+                                            if (val !== _before_keyup_value) {
+                                                setAtPixel = i;
+                                                break;
+                                            }
+                                        }
+                                    } else {
+                                        // the grip was moved towards the left
+
+                                        for (i = _before_keyup_pixel; i >= 0; i--) {
+
+                                            // if the value at pixel i is different than
+                                            // the current value then we are good to go.
+                                            //
+                                            val = methods.round_value_according_to_rounding.call($this, _methods.getSliderValuesAtPositionPx.call($this, i, i)[1]);
+                                            if (val !== _before_keyup_value) {
+                                                setAtPixel = i;
+                                                break;
+                                            }
+                                        }
+                                    }
+
+                                    // we need to set the slider at this position
+                                    if (_is_left_grip) {
+                                        _methods.validateAndMoveGripsToPx.call($this, setAtPixel, _methods.getRightGripPositionPx.call($this));
+                                    } else {
+                                        _methods.validateAndMoveGripsToPx.call($this, _methods.getLeftGripPositionPx.call($this), setAtPixel);
+                                    }
+
+                                    //
+                                    // call the mouseup callback when the key is up!
+                                    //
+                                    _methods.notify_mouse_up_implicit.call($this, _is_left_grip);
+                                }
+                        }
+
+                        // clear values 
+                        _before_keydown_value = undefined;
+                        _before_keydown_pixel = undefined;
+                        _before_keyup_value = undefined;
+                        _before_keyup_pixel = undefined;
+                    }
+                });
+                $this.bind('keydown.nstSlider', function (evt) {
+                    if ($this.data('enabled')) {
+
+                        var moveHandleBasedOnKeysFunc = function moveHandleBasedOnKeysFunc($grip, e) {
+
+                            var nextLeft = _methods.getLeftGripPositionPx.call($this),
+                                nextRight = _methods.getRightGripPositionPx.call($this);
+
+                            if (typeof _before_keydown_value === 'undefined') {
+                                _before_keydown_pixel = _is_left_grip ? nextLeft : nextRight;
+
+                                _before_keydown_value = _is_left_grip ? methods.get_current_min_value.call($this) : methods.get_current_max_value.call($this);
+                            }
+
+                            switch (e.which) {
+                                case 37: // left
+                                case 40:
+                                    // down
+                                    if (_is_left_grip) {
+                                        nextLeft--;
+                                    } else {
+                                        nextRight--;
+                                    }
+                                    e.preventDefault();
+                                    break;
+
+                                case 38: // up
+                                case 39:
+                                    // right 
+                                    if (_is_left_grip) {
+                                        nextLeft++;
+                                    } else {
+                                        nextRight++;
+                                    }
+
+                                    e.preventDefault();
+                                    break;
+                            }
+
+                            _before_keyup_pixel = _is_left_grip ? nextLeft : nextRight;
+
+                            // may write into cur_min, cur_max data...
+                            _methods.validateAndMoveGripsToPx.call($this, nextLeft, nextRight);
+
+                            _before_keyup_value = _is_left_grip ? methods.get_current_min_value.call($this) : methods.get_current_max_value.call($this);
+                        };
+
+                        // default
+                        if (has_right_grip && $this.find(':focus').is($right_grip)) {
+                            _is_left_grip = false;
+                            moveHandleBasedOnKeysFunc.call($this, $right_grip, evt);
+                        } else {
+                            _is_left_grip = true;
+                            moveHandleBasedOnKeysFunc.call($this, $left_grip, evt);
+                        }
+                    }
+                });
+
+                // determine size of grips
+                var left_grip_width = _methods.getLeftGripWidth.call($this),
+                    right_grip_width = has_right_grip ? _methods.getRightGripWidth.call($this) : left_grip_width;
+
+                $this.data('left_grip_width', left_grip_width);
+                $this.data('right_grip_width', right_grip_width);
+
+                $this.data('value_bar_selector', settings.value_bar_selector);
+
+                // set behaviour of naked bar in case of one handle
+                if (!has_right_grip) {
+                    var bStickToSides = valueMax === rangeMax || valueMax === rangeMin;
+                    _methods.setNakedBarDelta.call($this, bStickToSides ? "stickToSides" : "middle", left_grip_width);
+                }
+
+                // this will set the range to the right extreme in such a case.
+                if (rangeMin === rangeMax || valueMin === valueMax) {
+                    methods.set_range.call($this, rangeMin, rangeMax);
+                } else {
+
+                    // set the initial position
+                    _methods.set_position_from_val.call($this, $this.data('cur_min'), $this.data('cur_max'));
+                }
+
+                _methods.notify_changed_implicit.call($this, 'init');
+
+                // handle mouse movement
+                $this.data('beforestart_min', methods.get_current_min_value.call($this));
+                $this.data('beforestart_max', methods.get_current_max_value.call($this));
+
+                // pass a closure, so that 'this' will be the current slider bar,
+                // not the container.
+                $this.bind('mousedown.nstSlider', function (e) {
+                    _methods.drag_start_func.call($this, e, settings, $left_grip, $right_grip, false);
+                });
+
+                $container.bind('touchstart.nstSlider', function (e) {
+                    _methods.drag_start_func_touch.call($this, e, settings, $left_grip, $right_grip, true);
+                });
+                $container.bind('touchend.nstSlider', function (e) {
+                    _methods.drag_end_func_touch.call($this, e);
+                });
+                $container.bind('touchmove.nstSlider', function (e) {
+                    _methods.drag_move_func_touch.call($this, e);
+                });
+
+                // if the data-histogram attribute exists, then use this
+                // histogram to set the step distribution
+                var step_histogram = $this.data('histogram');
+                if (typeof step_histogram !== 'undefined') {
+                    methods.set_step_histogram.call($this, step_histogram);
+                }
+            }); // -- each slider
+        },
+        'get_range_min': function get_range_min() {
+            var $this = this;
+            return $this.data('range_min');
+        },
+        'get_range_max': function get_range_max() {
+            var $this = this;
+            return $this.data('range_max');
+        },
+        'get_current_min_value': function get_current_min_value() {
+            var $this = $(this);
+
+            var rangeMin = methods.get_range_min.call($this),
+                rangeMax = methods.get_range_max.call($this);
+
+            var currentMin = $this.data('cur_min');
+
+            var min;
+            if (rangeMin >= currentMin) {
+                min = rangeMin;
+            } else {
+                min = methods.round_value_according_to_rounding.call($this, currentMin);
+            }
+
+            if (_methods.haveLimits.call($this)) {
+                if (min <= rangeMin) {
+                    return $this.data('lower-limit');
+                } else if (min >= rangeMax) {
+                    return $this.data('upper-limit');
+                }
+            } else {
+                if (min <= rangeMin) {
+                    return rangeMin;
+                } else if (min >= rangeMax) {
+                    return rangeMax;
+                }
+            }
+
+            return min;
+        },
+        'get_current_max_value': function get_current_max_value() {
+            var $this = $(this);
+
+            var rangeMin = methods.get_range_min.call($this),
+                rangeMax = methods.get_range_max.call($this);
+
+            var currentMax = $this.data('cur_max');
+
+            var max;
+            if (rangeMax <= currentMax) {
+                max = rangeMax;
+            } else {
+                max = methods.round_value_according_to_rounding.call($this, currentMax);
+            }
+
+            if (_methods.haveLimits.call($this)) {
+                if (max >= rangeMax) {
+                    return $this.data('upper-limit');
+                } else if (max <= rangeMin) {
+                    return $this.data('lower-limit');
+                }
+            } else {
+                if (max >= rangeMax) {
+                    return rangeMax;
+                } else if (max <= rangeMin) {
+                    return rangeMin;
+                }
+            }
+
+            return max;
+        },
+        'is_handle_to_left_extreme': function is_handle_to_left_extreme() {
+            var $this = this;
+            if (_methods.haveLimits.call($this)) {
+                return $this.data('lower-limit') === methods.get_current_min_value.call($this);
+            } else {
+                return methods.get_range_min.call($this) === methods.get_current_min_value.call($this);
+            }
+        },
+        'is_handle_to_right_extreme': function is_handle_to_right_extreme() {
+            var $this = this;
+            if (_methods.haveLimits.call($this)) {
+                return $this.data('upper-limit') === methods.get_current_max_value.call($this);
+            } else {
+                return methods.get_range_max.call($this) === methods.get_current_max_value.call($this);
+            }
+        },
+        // just call set_position on the current values
+        'refresh': function refresh() {
+            var $this = this;
+
+            // re-set the slider step if specified
+            var lastStepHistogram = $this.data('last_step_histogram');
+            if (typeof lastStepHistogram !== 'undefined') {
+                methods.set_step_histogram.call($this, lastStepHistogram);
+            }
+
+            // re-center given values
+            _methods.set_position_from_val.call($this, methods.get_current_min_value.call($this), methods.get_current_max_value.call($this));
+
+            // re-highlight the range
+            var highlightRangeMin = $this.data('highlightedRangeMin');
+            if (typeof highlightRangeMin === 'number') {
+                // a highlight range is present, we must update it
+                var highlightRangeMax = $this.data('highlightedRangeMax');
+                methods.highlight_range.call($this, highlightRangeMin, highlightRangeMax);
+            }
+
+            _methods.notify_changed_implicit.call($this, 'refresh');
+            return $this;
+        },
+        'disable': function disable() {
+            var $this = this,
+                settings = $this.data('settings');
+
+            $this.data('enabled', false).find(settings.left_grip_selector).attr('aria-disabled', 'true').end().find(settings.right_grip_selector).attr('aria-disabled', 'true');
+
+            return $this;
+        },
+        'enable': function enable() {
+            var $this = this,
+                settings = $this.data('settings');
+
+            $this.data('enabled', true).find(settings.left_grip_selector).attr('aria-disabled', 'false').end().find(settings.right_grip_selector).attr('aria-disabled', 'false');
+
+            return $this;
+        },
+        'is_enabled': function is_enabled() {
+            var $this = this;
+            return $this.data('enabled');
+        },
+        /*
+         * This one is the public method, called externally.
+         * It sets the position and notifies in fact.
+         */
+        'set_position': function set_position(min, max) {
+            var $this = this;
+
+            var prev_min = $this.data('cur_min'),
+                prev_max = $this.data('cur_max');
+
+            if (min > max) {
+                _methods.set_position_from_val.call($this, max, min);
+            } else {
+                _methods.set_position_from_val.call($this, min, max);
+            }
+
+            // set the style of the grips according to the highlighted range
+            _methods.refresh_grips_style.call($this);
+
+            _methods.notify_changed_implicit.call($this, 'set_position', prev_min, prev_max);
+
+            // this is for the future, therefore "before the next
+            // interaction starts"
+            $this.data('beforestart_min', min);
+            $this.data('beforestart_max', max);
+        },
+        /*
+         * This tells the slider to increment its step non linearly over the
+         * current range, based on the histogram on where results are.
+         *
+         * the input parameter 'histogram' identifies an empirical probability
+         * density function (PDF).
+         *
+         */
+        'set_step_histogram': function set_step_histogram(histogram) {
+            var $this = this;
+
+            $this.data('last_step_histogram', histogram);
+
+            if (typeof histogram === 'undefined') {
+                $.error('got an undefined histogram in set_step_histogram');
+                _methods.unset_step_histogram.call($this);
+            }
+
+            var sliderWidthPx = _methods.getSliderWidthPx.call($this) - $this.data('left_grip_width'),
+                nbuckets = histogram.length;
+
+            if (sliderWidthPx <= 0) {
+                // that means the slider is not visible...
+                return;
+            }
+
+            //
+            // we need to transform this pdf into a cdf, and use it to obtain
+            // two mappings: pixel to value and value to pixel.
+            //
+            // 1) normalize the pdf to sum to sliderWidthPx first
+            var i;
+            var histogram_sum = 0;
+            for (i = 0; i < nbuckets; i++) {
+                histogram_sum += histogram[i];
+            }
+
+            //
+            // if the sum of the histogram is 0 it means that all is 0 in the 
+            // histogram! (i.e, flat histogram). In this case we already know
+            // what's going to be the answer...
+            //
+            if (histogram_sum === 0) {
+                // ... and the answer is: a linear scale between min_range and
+                // max range!
+                methods.unset_step_histogram.call($this);
+
+                return $this;
+            }
+
+            // coefficient for normalization
+            var coeff = parseFloat(histogram_sum) / sliderWidthPx;
+
+            // go normalize the histogram using this coefficient!
+            for (i = 0; i < nbuckets; i++) {
+                histogram[i] = histogram[i] / coeff;
+            }
+
+            // 2) now that the histogram is normalized, extract the cumulative
+            // distribution function (CDF). This is an always increasing function
+            // that ranges between 0 and sliderWidthPx;
+            //
+            // We also build the inverted cdf, just the cdf read the other way
+            // around.
+            //
+            var cdf = [histogram[0]]; // points to pixels
+            for (i = 1; i < nbuckets; i++) {
+                var cdf_x = cdf[i - 1] + histogram[i];
+                cdf.push(cdf_x);
+            }
+            cdf.push(sliderWidthPx);
+
+            // the first value here is always min_range as the cdf is supposed
+            // to start from 0 (also first pixel = min_range)
+            var pixel_to_value_lookup = [$this.data('range_min')];
+
+            var last_filled = 0; // we've already filled 0
+
+            // now stretch over the rest of the cdf
+            var last_price_for_cdf_bucket = pixel_to_value_lookup[0];
+
+            var cdf_bucket_count = 0;
+            while (last_filled <= sliderWidthPx) {
+                // do until all pixels are filled
+
+                // get next item from cdf
+                var fill_up_to_px = parseInt(cdf.shift(), 10);
+                var price_for_cdf_bucket = _methods.inverse_rangemap_0_to_n.call($this, cdf_bucket_count + 1, nbuckets + 1);
+
+                cdf_bucket_count++;
+
+                // how many pixels do we have to fill
+                var fill_tot = fill_up_to_px - last_filled;
+
+                // interpolate and fill
+                var diff = price_for_cdf_bucket - last_price_for_cdf_bucket;
+                for (i = last_filled; i < fill_up_to_px; i++) {
+                    var next_price_for_cdf_bucket = last_price_for_cdf_bucket + diff * (i - last_filled + 1) / fill_tot;
+
+                    pixel_to_value_lookup.push(next_price_for_cdf_bucket);
+
+                    last_filled++;
+
+                    last_price_for_cdf_bucket = next_price_for_cdf_bucket;
+                }
+
+                if (last_filled === sliderWidthPx) {
+                    break;
+                }
+            }
+            pixel_to_value_lookup[pixel_to_value_lookup.length - 1] = $this.data('range_max');
+
+            // 3) build lookup functions to extract pixels and values from the
+            // cdf and the inverted cdf.
+            //
+            var pixel_to_value_mapping = function pixel_to_value_mapping(pixel) {
+                return pixel_to_value_lookup[parseInt(pixel, 10)];
+            };
+
+            var value_to_pixel_mapping = function value_to_pixel_mapping(value) {
+                //
+                // Binary search into the array of pixels, returns always the
+                // rightmost pixel if there is no exact match.
+                //
+                var suggestedPixel = _methods.binarySearch.call($this, pixel_to_value_lookup, value, function (a, i) {
+                    return a[i];
+                }, // access a value in the array
+                _methods.binarySearchValueToPxCompareFunc);
+
+                // exact match
+                if (pixel_to_value_lookup[suggestedPixel] === value) {
+                    return suggestedPixel;
+                }
+
+                // approx match: we need to check if it's closer to the value
+                // at suggestedPixel or the value at suggestedPixel-1
+                if (Math.abs(pixel_to_value_lookup[suggestedPixel - 1] - value) < Math.abs(pixel_to_value_lookup[suggestedPixel] - value)) {
+
+                    return suggestedPixel - 1;
+                }
+                return suggestedPixel;
+            };
+
+            //
+            // these two functions will be stored and then used internally to
+            // decide what value to display given a certain pixel, and what
+            // pixel to put the slider on given a certain value.
+            //
+            $this.data('pixel_to_value_mapping', pixel_to_value_mapping);
+            $this.data('value_to_pixel_mapping', value_to_pixel_mapping);
+
+            return $this;
+        },
+        /*
+         * Remove the pixel-to-value and the value-to-pixel mappings from the
+         * slider so that the slider can follow a linear step over the current
+         * range again.
+         */
+        'unset_step_histogram': function unset_step_histogram() {
+            var $this = this;
+
+            $this.removeData('pixel_to_value_mapping');
+            $this.removeData('value_to_pixel_mapping');
+            $this.removeData('last_step_histogram');
+
+            return $this;
+        },
+        'set_range': function set_range(rangeMin, rangeMax) {
+            var $this = this;
+
+            // get the current values
+            var oldMin = methods.get_current_min_value.call($this),
+                oldMax = methods.get_current_max_value.call($this);
+
+            // set range
+            $this.data('range_min', rangeMin);
+            $this.data('range_max', rangeMax);
+
+            // try to re-center old values in the new range.
+            // NOTE: this may set different values!
+            _methods.set_position_from_val.call($this, oldMin, oldMax);
+
+            /*
+             * Re-highlight ranges if any are defined.
+             */
+            // var highlightRangeMin = $this.data('highlightedRangeMin');
+            // if (typeof rangeMin === 'number') {
+            //     // a highlight range is present, we must update it
+            //     var highlightRangeMax = $this.data('highlightedRangeMax');
+            //     methods.highlight_range.call($this, highlightRangeMin, highlightRangeMax);
+            // }
+
+            // pass old min and max in the notify_changed_implicit method, so that we
+            // notify if we need to
+            _methods.notify_changed_implicit.call($this, 'set_range', oldMin, oldMax);
+
+            return $this;
+        },
+        /*
+         * This method highlights the range of the slider apart from the
+         * position of the slider grips.
+         * To work well, the slider must have background color set to
+         * transparent in the CSS or not set.
+         */
+        'highlight_range': function highlight_range(rangeMin, rangeMax) {
+            var $this = this;
+            var settings = $this.data('settings');
+
+            if (typeof settings.highlight === "undefined") {
+                $.error('you cannot call highlight_range if you haven\' specified the "highlight" parameter in construction!');
+            }
+
+            // avoid empty string
+            if (!rangeMin) {
+                rangeMin = 0;
+            }
+            if (!rangeMax) {
+                rangeMax = 0;
+            }
+
+            // we need to map rangeMin and rangeMax into pixels.
+            var leftPx = methods.value_to_px.call($this, rangeMin),
+                rightPx = methods.value_to_px.call($this, rangeMax),
+                barWidth = rightPx - leftPx + $this.data('left_grip_width');
+
+            // set position
+            var $highlightPanel = $this.find(settings.highlight.panel_selector);
+
+            $highlightPanel.css('left', leftPx + "px");
+            $highlightPanel.css('width', barWidth + "px");
+
+            // keep the latest highlighted range, because if set_range is called
+            // we must be able to update the highlighting.
+            $this.data('highlightedRangeMin', rangeMin);
+            $this.data('highlightedRangeMax', rangeMax);
+
+            // now decide wether the handler should be highlight
+            _methods.refresh_grips_style.call($this);
+
+            return $this;
+        },
+        /*
+         * Sets the increment rounding for the slider, see input parameters section
+         * for more information.
+         */
+        'set_rounding': function set_rounding(rounding) {
+            var $this = this;
+
+            if (typeof rounding === 'string' && rounding.indexOf('{') > -1) {
+                // probably a json string
+                rounding = $.parseJSON(rounding);
+            }
+
+            $this.data('rounding', rounding);
+
+            // build an array of roundings and sort it by value to facilitate search
+            // when the range is going to be set.
+            var roundings_array = [];
+            if ((typeof rounding === "undefined" ? "undefined" : _typeof(rounding)) === 'object') {
+                // initial object has the form { value : range }
+                var rounding_value;
+                for (rounding_value in rounding) {
+                    // skip_javascript_test
+                    if (rounding.hasOwnProperty(rounding_value)) {
+                        var rounding_range = rounding[rounding_value];
+                        roundings_array.push({
+                            'range': rounding_range,
+                            'value': rounding_value
+                        });
+                    }
+                }
+
+                // now sort it by rounding range
+                roundings_array.sort(function (a, b) {
+                    return a.range - b.range;
+                });
+
+                $this.data('rounding_ranges', roundings_array);
+            } else {
+                $this.removeData('rounding_ranges');
+            }
+
+            return $this;
+        },
+        'get_rounding': function get_rounding() {
+            var $this = this;
+            return $this.data('rounding');
+        },
+        /*
+         * This method rounds a given value to the closest integer defined
+         * according to the rounding. Examples:
+         * rounding: 10 v: 12.3    --> 10
+         * rounding: 1 v: 12.3     --> 12
+         * rounding: 10 v: 12.6    --> 13
+         */
+        'round_value_according_to_rounding': function round_value_according_to_rounding(v) {
+            var $this = this;
+            var rounding = _methods.get_rounding_for_value.call($this, v);
+
+            if (rounding > 0) {
+                // We bring ourselves in a space of unitary roundings. You can
+                // imagine now that sliders range between a certain minimum and 
+                // maximum, and we always increase/decrease of one.
+                var increment = v / rounding;
+
+                // This is the proposed value.
+                var increment_int = parseInt(increment, 10);
+
+                // delta is a positive number between 0 and 1 that tells us how
+                // close is the slider to integer + 1 (i.e., the next rounding).
+                // 0 means the grip is exactly on integer
+                // 1 means the grip is on integer + 1.
+                var delta = increment - increment_int;
+
+                // now use delta to modify or not the current value.
+                if (delta > 0.5) {
+                    increment_int++;
+                }
+
+                // we now move the 
+                var rounded = increment_int * rounding;
+
+                return rounded;
+            } else {
+                $.error('rounding must be > 0, got ' + rounding + ' instead');
+            }
+            return v;
+        },
+        /*
+         * Utility function. Given a value within the range of the slider,
+         * converts the value in pixels. If a value_to_pixel_mapping function
+         * is defined it will be used, otherwise a linear mapping is used for
+         * the conversion.
+         */
+        'value_to_px': function value_to_px(value) {
+            var $this = this,
+                value_to_pixel_mapping_func = $this.data('value_to_pixel_mapping');
+
+            // try using non-linear mapping if it's there...
+            if (typeof value_to_pixel_mapping_func !== 'undefined') {
+                return value_to_pixel_mapping_func(value);
+            }
+
+            // ... use linear mapping otherwise
+            var w = _methods.getSliderWidthPx.call($this) - $this.data('left_grip_width');
+            return _methods.rangemap_0_to_n.call($this, value, w);
+        }
+    };
+
+    var __name__ = 'nstSlider';
+
+    $.fn[__name__] = function (method) {
+        /*
+         * Just a router for method calls
+         */
+        if (methods[method]) {
+            if (this.data('initialized') === true) {
+                // call a method
+                return methods[method].apply(this, Array.prototype.slice.call(arguments, 1));
+            } else {
+                throw new Error('method ' + method + ' called on an uninitialized instance of ' + __name__);
+            }
+        } else if ((typeof method === "undefined" ? "undefined" : _typeof(method)) === 'object' || !method) {
+            // call init, user passed the settings as parameters
+            this.data('initialized', true);
+            return methods.init.apply(this, arguments);
+        } else {
+            $.error('Cannot call method ' + method);
+        }
+    };
+})(jQuery);
+
+/***/ }),
+/* 45 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var disposed = false
-var normalizeComponent = __webpack_require__(4)
+var normalizeComponent = __webpack_require__(2)
 /* script */
-var __vue_script__ = __webpack_require__(45)
+var __vue_script__ = __webpack_require__(46)
 /* template */
-var __vue_template__ = __webpack_require__(46)
+var __vue_template__ = __webpack_require__(47)
 /* template functional */
 var __vue_template_functional__ = false
 /* styles */
@@ -50463,7 +52442,7 @@ module.exports = Component.exports
 
 
 /***/ }),
-/* 45 */
+/* 46 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -50515,7 +52494,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 });
 
 /***/ }),
-/* 46 */
+/* 47 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var render = function() {
@@ -50544,19 +52523,19 @@ if (false) {
 }
 
 /***/ }),
-/* 47 */
+/* 48 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var disposed = false
 function injectStyle (ssrContext) {
   if (disposed) return
-  __webpack_require__(48)
+  __webpack_require__(49)
 }
-var normalizeComponent = __webpack_require__(4)
+var normalizeComponent = __webpack_require__(2)
 /* script */
-var __vue_script__ = __webpack_require__(51)
+var __vue_script__ = __webpack_require__(52)
 /* template */
-var __vue_template__ = __webpack_require__(52)
+var __vue_template__ = __webpack_require__(53)
 /* template functional */
 var __vue_template_functional__ = false
 /* styles */
@@ -50595,17 +52574,17 @@ module.exports = Component.exports
 
 
 /***/ }),
-/* 48 */
+/* 49 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // style-loader: Adds some css to the DOM by adding a <style> tag
 
 // load the styles
-var content = __webpack_require__(49);
+var content = __webpack_require__(50);
 if(typeof content === 'string') content = [[module.i, content, '']];
 if(content.locals) module.exports = content.locals;
 // add the styles to the DOM
-var update = __webpack_require__(13)("6c26e343", content, false, {});
+var update = __webpack_require__(6)("6c26e343", content, false, {});
 // Hot Module Replacement
 if(false) {
  // When the styles change, update the <style> tags
@@ -50621,10 +52600,10 @@ if(false) {
 }
 
 /***/ }),
-/* 49 */
+/* 50 */
 /***/ (function(module, exports, __webpack_require__) {
 
-exports = module.exports = __webpack_require__(12)(false);
+exports = module.exports = __webpack_require__(5)(false);
 // imports
 
 
@@ -50635,7 +52614,7 @@ exports.push([module.i, "\n.upload-preview[data-v-fa3dfa7c]{\n\tborder: 1px soli
 
 
 /***/ }),
-/* 50 */
+/* 51 */
 /***/ (function(module, exports) {
 
 /**
@@ -50668,7 +52647,7 @@ module.exports = function listToStyles (parentId, list) {
 
 
 /***/ }),
-/* 51 */
+/* 52 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -50765,7 +52744,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 });
 
 /***/ }),
-/* 52 */
+/* 53 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var render = function() {
@@ -50823,19 +52802,19 @@ if (false) {
 }
 
 /***/ }),
-/* 53 */
+/* 54 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var disposed = false
 function injectStyle (ssrContext) {
   if (disposed) return
-  __webpack_require__(54)
+  __webpack_require__(55)
 }
-var normalizeComponent = __webpack_require__(4)
+var normalizeComponent = __webpack_require__(2)
 /* script */
-var __vue_script__ = __webpack_require__(56)
+var __vue_script__ = __webpack_require__(57)
 /* template */
-var __vue_template__ = __webpack_require__(57)
+var __vue_template__ = __webpack_require__(58)
 /* template functional */
 var __vue_template_functional__ = false
 /* styles */
@@ -50874,17 +52853,17 @@ module.exports = Component.exports
 
 
 /***/ }),
-/* 54 */
+/* 55 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // style-loader: Adds some css to the DOM by adding a <style> tag
 
 // load the styles
-var content = __webpack_require__(55);
+var content = __webpack_require__(56);
 if(typeof content === 'string') content = [[module.i, content, '']];
 if(content.locals) module.exports = content.locals;
 // add the styles to the DOM
-var update = __webpack_require__(13)("49919428", content, false, {});
+var update = __webpack_require__(6)("49919428", content, false, {});
 // Hot Module Replacement
 if(false) {
  // When the styles change, update the <style> tags
@@ -50900,10 +52879,10 @@ if(false) {
 }
 
 /***/ }),
-/* 55 */
+/* 56 */
 /***/ (function(module, exports, __webpack_require__) {
 
-exports = module.exports = __webpack_require__(12)(false);
+exports = module.exports = __webpack_require__(5)(false);
 // imports
 
 
@@ -50914,7 +52893,7 @@ exports.push([module.i, "\n.card-content[data-v-21e021bc]{\n\t\tborder: 1px soli
 
 
 /***/ }),
-/* 56 */
+/* 57 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -50988,7 +52967,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 });
 
 /***/ }),
-/* 57 */
+/* 58 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var render = function() {
@@ -51087,7 +53066,659 @@ if (false) {
 }
 
 /***/ }),
-/* 58 */
+/* 59 */
+/***/ (function(module, exports, __webpack_require__) {
+
+var disposed = false
+function injectStyle (ssrContext) {
+  if (disposed) return
+  __webpack_require__(60)
+}
+var normalizeComponent = __webpack_require__(2)
+/* script */
+var __vue_script__ = __webpack_require__(62)
+/* template */
+var __vue_template__ = __webpack_require__(64)
+/* template functional */
+var __vue_template_functional__ = false
+/* styles */
+var __vue_styles__ = injectStyle
+/* scopeId */
+var __vue_scopeId__ = "data-v-2fb07f42"
+/* moduleIdentifier (server only) */
+var __vue_module_identifier__ = null
+var Component = normalizeComponent(
+  __vue_script__,
+  __vue_template__,
+  __vue_template_functional__,
+  __vue_styles__,
+  __vue_scopeId__,
+  __vue_module_identifier__
+)
+Component.options.__file = "resources/assets/js/components/PropertiesFilter.vue"
+
+/* hot reload */
+if (false) {(function () {
+  var hotAPI = require("vue-hot-reload-api")
+  hotAPI.install(require("vue"), false)
+  if (!hotAPI.compatible) return
+  module.hot.accept()
+  if (!module.hot.data) {
+    hotAPI.createRecord("data-v-2fb07f42", Component.options)
+  } else {
+    hotAPI.reload("data-v-2fb07f42", Component.options)
+  }
+  module.hot.dispose(function (data) {
+    disposed = true
+  })
+})()}
+
+module.exports = Component.exports
+
+
+/***/ }),
+/* 60 */
+/***/ (function(module, exports, __webpack_require__) {
+
+// style-loader: Adds some css to the DOM by adding a <style> tag
+
+// load the styles
+var content = __webpack_require__(61);
+if(typeof content === 'string') content = [[module.i, content, '']];
+if(content.locals) module.exports = content.locals;
+// add the styles to the DOM
+var update = __webpack_require__(6)("05981af3", content, false, {});
+// Hot Module Replacement
+if(false) {
+ // When the styles change, update the <style> tags
+ if(!content.locals) {
+   module.hot.accept("!!../../../../node_modules/css-loader/index.js!../../../../node_modules/vue-loader/lib/style-compiler/index.js?{\"vue\":true,\"id\":\"data-v-2fb07f42\",\"scoped\":true,\"hasInlineConfig\":true}!../../../../node_modules/vue-loader/lib/selector.js?type=styles&index=0!./PropertiesFilter.vue", function() {
+     var newContent = require("!!../../../../node_modules/css-loader/index.js!../../../../node_modules/vue-loader/lib/style-compiler/index.js?{\"vue\":true,\"id\":\"data-v-2fb07f42\",\"scoped\":true,\"hasInlineConfig\":true}!../../../../node_modules/vue-loader/lib/selector.js?type=styles&index=0!./PropertiesFilter.vue");
+     if(typeof newContent === 'string') newContent = [[module.id, newContent, '']];
+     update(newContent);
+   });
+ }
+ // When the module is disposed, remove the <style> tags
+ module.hot.dispose(function() { update(); });
+}
+
+/***/ }),
+/* 61 */
+/***/ (function(module, exports, __webpack_require__) {
+
+exports = module.exports = __webpack_require__(5)(false);
+// imports
+
+
+// module
+exports.push([module.i, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n", ""]);
+
+// exports
+
+
+/***/ }),
+/* 62 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_v_range_slider__ = __webpack_require__(63);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_v_range_slider___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0_v_range_slider__);
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+
+
+
+/* harmony default export */ __webpack_exports__["default"] = ({
+    components: {
+        RangeSlider: __WEBPACK_IMPORTED_MODULE_0_v_range_slider___default.a
+    },
+    props: {
+        areas: {
+            required: true
+        },
+        types: {
+            required: true
+        }
+    },
+    data: function data() {
+        return {
+            payload: {
+                amount: null
+            },
+            filters: {
+                areas: {},
+                types: {}
+            }
+        };
+    },
+    computed: {
+        // hasDetails: function () {
+        //    	if(this.property.nb_bathrooms || this.property.nb_bedrooms || this.property.nb_parkings) 
+        //    		return true;
+
+        //    	return false;
+        //    }
+    },
+    mounted: function mounted() {
+        this.filters.areas = JSON.parse(this.areas);
+        this.filters.types = JSON.parse(this.types);
+    },
+
+    methods: {
+        // getSuffix(value) {
+        //    	if(value > 1)
+        //    		return 's';
+
+        //    	return null;
+        // }
+    }
+});
+
+/***/ }),
+/* 63 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+/*!
+ * v-range-slider v0.0.7
+ * https://github.com/mykeels/v-range-slider
+ *
+ * @license
+ * Copyright (c) 2016-2018 mykeels
+ * Released under the MIT license
+ * https://github.com/mykeels/v-range-slider/blob/master/LICENSE
+ */
+
+
+/* global window, document */
+
+var DocumentEventHelper = {
+  created: function created() {
+    if (typeof document === 'undefined') return;
+    forEachListener(this, function (key, listener) {
+      on(document, key, listener);
+    });
+  },
+  beforeDestroy: function beforeDestroy() {
+    if (typeof document === 'undefined') return;
+    forEachListener(this, function (key, listener) {
+      off(document, key, listener);
+    });
+  }
+};
+
+var isBrowser = typeof window !== 'undefined';
+
+var hasPassive = isBrowser && function () {
+  var supported = false;
+
+  try {
+    var desc = {
+      get: function get() {
+        supported = true;
+      }
+    };
+    var opts = Object.defineProperty({}, 'passive', desc);
+
+    window.addEventListener('test', null, opts);
+    window.removeEventListener('test', null, opts);
+  } catch (e) {
+    supported = false;
+  }
+
+  return supported;
+}();
+
+function forEachListener(vm, f) {
+  var events = vm.$options.events;
+  Object.keys(events).forEach(function (key) {
+    f(key, function (event) {
+      return events[key].call(vm, event);
+    });
+  });
+}
+
+function on(el, name, fn) {
+  var options = hasPassive ? { passive: false } : undefined;
+  el.addEventListener(name, fn, options);
+}
+
+function off(el, name, fn) {
+  var options = hasPassive ? { passive: false } : undefined;
+  el.removeEventListener(name, fn, options);
+}
+
+function relativeMouseOffset(offset, base) {
+  var bounds = base.getBoundingClientRect();
+  return {
+    left: offset.clientX - bounds.left,
+    top: offset.clientY - bounds.top
+  };
+}
+
+function round(value, min, max, step) {
+  if (value <= min) {
+    return min;
+  }
+
+  var roundedMax = Math.floor((max - min) / step) * step + min;
+  if (value >= roundedMax) {
+    return roundedMax;
+  }
+
+  var normalize = (value - min) / step;
+  var decimal = Math.floor(normalize);
+  var fraction = normalize - decimal;
+
+  if (fraction === 0) return value;
+
+  if (fraction < 0.5) {
+    return step * decimal + min;
+  } else {
+    return step * (decimal + 1) + min;
+  }
+}
+
+var DragHelper = {
+  mixins: [DocumentEventHelper],
+
+  props: {
+    targetSelector: String,
+    disabled: Boolean
+  },
+
+  data: function data() {
+    return {
+      isDrag: false
+    };
+  },
+
+
+  watch: {
+    target: 'bindTarget'
+  },
+
+  mounted: function mounted() {
+    this.bindTarget();
+  },
+
+
+  events: {
+    mousedown: function mousedown(event) {
+      return this.dragStart(event, this.offsetByMouse);
+    },
+    mousemove: function mousemove(event) {
+      return this.dragMove(event, this.offsetByMouse);
+    },
+    mouseup: function mouseup(event) {
+      return this.dragEnd(event, this.offsetByMouse);
+    },
+    touchstart: function touchstart(event) {
+      return this.dragStart(event, this.offsetByTouch);
+    },
+    touchmove: function touchmove(event) {
+      return this.dragMove(event, this.offsetByTouch);
+    },
+    touchend: function touchend(event) {
+      return this.dragEnd(event, this.offsetByTouch);
+    },
+    touchcancel: function touchcancel(event) {
+      return this.dragEnd(event, this.offsetByTouch);
+    }
+  },
+
+  methods: {
+    bindTarget: function bindTarget() {
+      this.target = this.$el.querySelector(this.targetSelector) || this.$el;
+    },
+    offsetByMouse: function offsetByMouse(event) {
+      return relativeMouseOffset(event, this.$el);
+    },
+    offsetByTouch: function offsetByTouch(event) {
+      var touch = event.touches.length === 0 ? event.changedTouches[0] : event.touches[0];
+      return relativeMouseOffset(touch, this.$el);
+    },
+    dragStart: function dragStart(event, f) {
+      if (this.disabled || this.target !== event.target) return;
+      event.preventDefault();
+      this.isDrag = true;
+      this.$emit('dragstart', event, f(event), this.target);
+    },
+    dragMove: function dragMove(event, f) {
+      if (!this.isDrag) return;
+      event.preventDefault();
+      this.$emit('drag', event, f(event), this.target);
+    },
+    dragEnd: function dragEnd(event, f) {
+      if (!this.isDrag) return;
+      event.preventDefault();
+      this.isDrag = false;
+      this.$emit('dragend', event, f(event), this.target);
+    }
+  },
+
+  render: function render() {
+    return this.$slots.default && this.$slots.default[0];
+  }
+};
+
+var popover = { render: function render() {
+    var _vm = this;var _h = _vm.$createElement;var _c = _vm._self._c || _h;return _c('div', { staticClass: "popover-container bottom", style: { 'margin-left': _vm.marginLeft + 'px' }, attrs: { "id": "popover-default" } }, [_c('div', [_vm._t("default")], 2)]);
+  }, staticRenderFns: [],
+  props: {
+    'percentValue': Number
+  },
+  computed: {
+    marginLeft: function marginLeft() {
+      return this.percentValue <= 6 ? this.percentValue / 6 * -30 : Math.min(-30, -30 - Math.floor((this.percentValue - 75 || 0) / 25 * 120));
+    }
+  }
+};
+
+var toConsumableArray = function (arr) {
+  if (Array.isArray(arr)) {
+    for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) arr2[i] = arr[i];
+
+    return arr2;
+  } else {
+    return Array.from(arr);
+  }
+};
+
+var RangeSlider = { render: function render() {
+    var _vm = this;var _h = _vm.$createElement;var _c = _vm._self._c || _h;return _c('span', { ref: "elem", staticClass: "range-slider", class: { disabled: _vm.disabled }, on: { "mousedown": _vm.shiftKnob } }, [_c('drag-helper', { attrs: { "target-selector": ".range-slider-knob", "disabled": _vm.disabled }, on: { "drag": _vm.drag, "dragend": _vm.dragEnd } }, [_c('span', { ref: "inner", staticClass: "range-slider-inner" }, [_c('input', { staticClass: "range-slider-hidden", attrs: { "type": "text", "name": _vm.name, "disabled": _vm.disabled }, domProps: { "value": _vm.actualValue } }), _vm._v(" "), _c('span', { staticClass: "range-slider-rail" }), _vm._v(" "), _c('span', { staticClass: "range-slider-fill", style: { width: _vm.valuePercent + '%' } }), _vm._v(" "), _c('span', { staticClass: "range-slider-knob", style: { left: _vm.valuePercent + '%' } }, [_vm._t("knob", null, { value: _vm.actualValue, min: _vm._min, max: _vm._max }), _vm._v(" "), !_vm.noPopover ? _c('popover', { attrs: { "percent-value": _vm.valuePercent } }, [_vm._t("popover", [_c('h4', [_vm._v(_vm._s(_vm.actualValue))])], { value: _vm.actualValue, min: _vm._min, max: _vm._max })], 2) : _vm._e()], 2), _vm._v(" "), !_vm.noCalibration ? _c('span', { staticClass: "range-slider-calibration" }, _vm._l(_vm.calibrationOffsets, function (offset) {
+      return _c('span', { key: offset, staticClass: "calibration-item", style: { left: offset + '%' } }, [_c('div', [_vm._v("|")]), _vm._v(" "), _c('span', { staticClass: "calibration-knob" }, [_vm._v(_vm._s((offset / 100 * (_vm._max - _vm._min) + _vm._min).toLocaleString('en')))])]);
+    })) : _vm._e()])])], 1);
+  }, staticRenderFns: [],
+  props: {
+    name: String,
+    value: [String, Number],
+    disabled: {
+      type: Boolean,
+      default: false
+    },
+    min: {
+      type: [String, Number],
+      default: 0
+    },
+    max: {
+      type: [String, Number],
+      default: 100
+    },
+    step: {
+      type: [String, Number],
+      default: 1
+    },
+    noPopover: {
+      type: Boolean,
+      default: false
+    },
+    noCalibration: {
+      type: Boolean,
+      default: false
+    },
+    calibrationCount: {
+      type: Number,
+      default: 10
+    }
+  },
+
+  data: function data() {
+    return {
+      actualValue: null
+    };
+  },
+  created: function created() {
+    var min = this._min,
+        max = this._max;
+
+    var defaultValue = Number(this.value);
+
+    if (this.value == null || isNaN(defaultValue)) {
+      if (min > max) {
+        defaultValue = min;
+      } else {
+        defaultValue = (min + max) / 2;
+      }
+    }
+
+    this.actualValue = this.round(defaultValue);
+  },
+
+
+  computed: {
+    _min: function _min() {
+      return Number(this.min);
+    },
+    _max: function _max() {
+      return Number(this.max);
+    },
+    _step: function _step() {
+      return Number(this.step);
+    },
+    valuePercent: function valuePercent() {
+      return (this.actualValue - this._min) / (this._max - this._min) * 100;
+    },
+    calibrationOffsets: function calibrationOffsets() {
+      var _this = this;
+
+      //this can definitely be improved
+      return [0].concat(toConsumableArray('0'.repeat(this.calibrationCount).split('').map(function (c, i) {
+        return i + 1;
+      }))).map(function (i) {
+        return i / _this.calibrationCount * 100;
+      });
+    }
+  },
+
+  watch: {
+    value: function value(newValue) {
+      var value = Number(newValue);
+      if (newValue != null && !isNaN(value)) {
+        this.actualValue = this.round(value);
+      }
+    },
+    min: function min() {
+      this.actualValue = this.round(this.actualValue);
+    },
+    max: function max() {
+      this.actualValue = this.round(this.actualValue);
+    }
+  },
+
+  methods: {
+    drag: function drag(event, offset) {
+      var offsetWidth = this.$refs.inner.offsetWidth;
+
+      this.actualValue = this.round(this.valueFromBounds(offset.left, offsetWidth));
+      this.emitEvent(this.actualValue);
+    },
+    dragEnd: function dragEnd(event, offset) {
+      var offsetWidth = this.$refs.inner.offsetWidth;
+
+      this.actualValue = this.round(this.valueFromBounds(offset.left, offsetWidth));
+      this.emitEvent(this.actualValue, true);
+    },
+    emitEvent: function emitEvent(value, isDragEnd) {
+      this.$emit('input', value);
+      if (isDragEnd) {
+        this.$emit('change', value);
+      }
+    },
+    valueFromBounds: function valueFromBounds(point, width) {
+      return point / width * (this._max - this._min) + this._min;
+    },
+    round: function round$$1(value) {
+      return round(value, this._min, this._max, this._step);
+    },
+    shiftKnob: function shiftKnob(e) {
+
+      if (['range-slider', 'range-slider-inner', 'range-slider-fill'].some(function (c) {
+        return e.path[0].classList.contains(c);
+      })) {
+        var x = e.pageX - this.$refs.elem.offsetLeft;
+
+        var percent = Math.floor(x / this.$refs.elem.offsetWidth * 100);
+
+        this.actualValue = this.round(percent / 100 * (this._max - this._min) + this._min);
+
+        this.emitEvent(this.actualValue, true);
+
+        console.log(e);
+      }
+    }
+  },
+
+  components: {
+    DragHelper: DragHelper,
+    popover: popover
+  },
+
+  mounted: function mounted() {}
+};
+
+module.exports = RangeSlider;
+
+
+/***/ }),
+/* 64 */
+/***/ (function(module, exports, __webpack_require__) {
+
+var render = function() {
+  var _vm = this
+  var _h = _vm.$createElement
+  var _c = _vm._self._c || _h
+  return _c("div", { staticClass: "clearfix", attrs: { id: "filters" } }, [
+    _c("div", { staticClass: "filter-item" }, [
+      _c("label", [_vm._v("Area:")]),
+      _vm._v(" "),
+      _c(
+        "select",
+        { staticClass: "selectpicker", attrs: { name: "areas" } },
+        [
+          _c("option", { attrs: { value: "-1" } }, [_vm._v("All Areas")]),
+          _vm._v(" "),
+          _vm._l(_vm.filters.areas, function(value, key) {
+            return _c("option", { domProps: { value: key } }, [
+              _vm._v(_vm._s(value))
+            ])
+          })
+        ],
+        2
+      )
+    ]),
+    _vm._v(" "),
+    _c("div", { staticClass: "filter-item" }, [
+      _c("label", [_vm._v("Property Type:")]),
+      _vm._v(" "),
+      _c(
+        "select",
+        { staticClass: "selectpicker", attrs: { name: "areas" } },
+        [
+          _c("option", { attrs: { value: "-1" } }, [_vm._v("All Properties")]),
+          _vm._v(" "),
+          _vm._l(_vm.filters.types, function(value, key) {
+            return _c("option", { domProps: { value: key } }, [
+              _vm._v(_vm._s(value))
+            ])
+          })
+        ],
+        2
+      )
+    ]),
+    _vm._v(" "),
+    _vm._m(0)
+  ])
+}
+var staticRenderFns = [
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c("div", { staticClass: "filter-item" }, [
+      _c("label", [
+        _vm._v("\n\t\t\t\tPrice Range:\n\t\t\t\t"),
+        _c("div", { staticClass: "price text-right" }, [
+          _c("span", [_vm._v("$")]),
+          _vm._v(" "),
+          _c("div", { staticClass: "leftLabel" }),
+          _vm._v(" "),
+          _c("span", [_vm._v("to $")]),
+          _vm._v(" "),
+          _c("div", { staticClass: "rightLabel" })
+        ])
+      ]),
+      _vm._v(" "),
+      _c(
+        "div",
+        {
+          staticClass: "nstSlider",
+          attrs: {
+            "data-range_min": "0",
+            "data-range_max": "500000",
+            "data-cur_min": "80000",
+            "data-cur_max": "200000"
+          }
+        },
+        [
+          _c("div", { staticClass: "bar" }),
+          _vm._v(" "),
+          _c("div", { staticClass: "leftGrip" }),
+          _vm._v(" "),
+          _c("div", { staticClass: "rightGrip" })
+        ]
+      )
+    ])
+  }
+]
+render._withStripped = true
+module.exports = { render: render, staticRenderFns: staticRenderFns }
+if (false) {
+  module.hot.accept()
+  if (module.hot.data) {
+    require("vue-hot-reload-api")      .rerender("data-v-2fb07f42", module.exports)
+  }
+}
+
+/***/ }),
+/* 65 */
 /***/ (function(module, exports) {
 
 // removed by extract-text-webpack-plugin

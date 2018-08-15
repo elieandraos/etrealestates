@@ -44,7 +44,7 @@
                 'listed_for', 
                 ['sale' => 'Sale', 'rent' => 'Rent'], 
                 null , 
-                ['class' => 'selectpicker', 'id' => 'listed_for']
+                ['class' => 'selectpicker full-width', 'id' => 'listed_for']
             ) !!}
             @if ($errors->has('listed_for'))
                 <span class="help-block">{{ $errors->first('listed_for') }}</span>
@@ -67,7 +67,7 @@
                 'area_id', 
                 $areas, 
                 null , 
-                ['class' => 'selectpicker', 'id' => 'area_id']
+                ['class' => 'selectpicker full-width', 'id' => 'area_id']
             ) !!}
             @if ($errors->has('area_id'))
                 <span class="help-block">{{ $errors->first('area_id') }}</span>
@@ -92,7 +92,7 @@
                 'type_id', 
                 $types, 
                 null , 
-                ['class' => 'selectpicker', 'id' => 'type_id']
+                ['class' => 'selectpicker full-width', 'id' => 'type_id']
             ) !!}
             @if ($errors->has('type_id'))
                 <span class="help-block">{{ $errors->first('type_id') }}</span>

@@ -282,7 +282,15 @@ div.bootstrap-select{
     border: 1px solid #e8e8e8;
     border-radius: 5px;
     background: #fff;
+    outline: 0 !important;
+}
+div.bootstrap-select.full-width{
     width: 100% !important;
+}
+div.filter-option:focus,
+div.filter-option:active,
+div.bootstrap-select .dropdown-toggle:focus,
+div.bootstrap-select .dropdown-toggle:active{
     outline: 0 !important;
 }
 div.bootstrap-select button,

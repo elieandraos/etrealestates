@@ -61,7 +61,7 @@
             </div>
         </nav>
 
-        <main class="py-4">
+        <main class="@if(URL::current() != URL::to('/')) py-4 @endif">
             @yield('content')
         </main>
     </div>

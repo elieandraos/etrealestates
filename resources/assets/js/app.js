@@ -10,6 +10,7 @@ require('./bootstrap');
 import Vue from 'vue';
 import VueSwal from 'vue-swal';
 require('bootstrap-select');
+require('./jquery.nstSlider');
 
 Vue.use(VueSwal)
 
@@ -22,6 +23,7 @@ Vue.use(VueSwal)
 Vue.component('confirm-delete', require('./components/ConfirmDelete.vue'));
 Vue.component('preview-upload', require('./components/PreviewUpload.vue'));
 Vue.component('property-card', require('./components/PropertyCard.vue'));
+Vue.component('properties-filter', require('./components/PropertiesFilter.vue'));
 
 const app = new Vue({
     el: '#app'
@@ -35,4 +37,29 @@ $(document).ready(function(){
 	 	'tickIcon' : 'fa-check',
 	 	'iconBase' : 'fa'
 	});
+
+	$('.nstSlider').nstSlider({
+	    "rounding": {
+	        "100": "1000",
+	        "1000": "10000",
+	        "10000": "100000"
+	    },
+	    "left_grip_selector": ".leftGrip",
+	    "right_grip_selector": ".rightGrip",
+	    "value_bar_selector": ".bar",
+	    "value_changed_callback": function(cause, leftValue, rightValue) {
+	        var $container = $(this).parent();
+	        $container.find('.leftLabel').text(String(leftValue).number_format());
+	        $container.find('.rightLabel').text(String(rightValue).number_format());
+	    }
+	});
 })
+
+String.prototype.number_format = function(d) {
+    var n = this;
+    var c = isNaN(d = Math.abs(d)) ? 2 : d;
+    var s = n < 0 ? "-" : "";
+    var i = parseInt(n = Math.abs(+n || 0).toFixed(c)) + "", j = (j = i.length) > 3 ? j % 3 : 0;
+    return s + (j ? i.substr(0, j) + ',' : "") + i.substr(j).replace(/(\d{3})(?=\d)/g, "$1" + ',');
+}
+

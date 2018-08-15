@@ -9,6 +9,7 @@ use App\Models\Property;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\PropertyRequest;
+use Illuminate\Support\Facades\Storage;
 
 class PropertyController extends Controller
 {
@@ -30,8 +31,11 @@ class PropertyController extends Controller
         $input = $request->all();
         $input['listed_by'] = Auth::user()->id;
     	$property = Property::create($input);
-        $property->addMediaFromRequest('featured_image')->toMediaCollection('featured');
-    	flash('Property was added successfully.')->success();
+        
+        if($request->has('featured_image'))
+            $property->addMediaFromRequest('featured_image')->toMediaCollection('featured');
+    	
+        flash('Property was added successfully.')->success();
         return redirect(route('properties.index'));
 	}
 
@@ -40,6 +44,7 @@ class PropertyController extends Controller
 		$property = Property::findOrFail($propertyId);
         $types = Type::orderBy('name', 'ASC')->pluck('name', 'id');
         $areas = Area::orderBy('name', 'ASC')->pluck('name', 'id');
+
         return view('admin.properties.edit', ['types' => $types, 'areas' => $areas, 'property' => $property]);
 	}
 
@@ -47,6 +52,13 @@ class PropertyController extends Controller
 	{
 		$property = Property::findOrFail($propertyId);
 		$property->update($request->all());
+
+        if($request->has('remove_exitsing_db_image'))
+            $property->clearMediaCollection('featured');
+
+        if($request->has('featured_image'))
+            $property->addMediaFromRequest('featured_image')->toMediaCollection('featured');
+
 		flash('Property was updated successfully.')->success();
         return redirect(route('properties.index'));
 	}

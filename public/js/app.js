@@ -50239,13 +50239,13 @@ if (false) {
 var disposed = false
 function injectStyle (ssrContext) {
   if (disposed) return
-  __webpack_require__(64)
+  __webpack_require__(46)
 }
 var normalizeComponent = __webpack_require__(11)
 /* script */
 var __vue_script__ = __webpack_require__(51)
 /* template */
-var __vue_template__ = __webpack_require__(66)
+var __vue_template__ = __webpack_require__(52)
 /* template functional */
 var __vue_template_functional__ = false
 /* styles */
@@ -50284,8 +50284,46 @@ module.exports = Component.exports
 
 
 /***/ }),
-/* 46 */,
-/* 47 */,
+/* 46 */
+/***/ (function(module, exports, __webpack_require__) {
+
+// style-loader: Adds some css to the DOM by adding a <style> tag
+
+// load the styles
+var content = __webpack_require__(47);
+if(typeof content === 'string') content = [[module.i, content, '']];
+if(content.locals) module.exports = content.locals;
+// add the styles to the DOM
+var update = __webpack_require__(49)("6c26e343", content, false, {});
+// Hot Module Replacement
+if(false) {
+ // When the styles change, update the <style> tags
+ if(!content.locals) {
+   module.hot.accept("!!../../../../node_modules/css-loader/index.js!../../../../node_modules/vue-loader/lib/style-compiler/index.js?{\"vue\":true,\"id\":\"data-v-fa3dfa7c\",\"scoped\":true,\"hasInlineConfig\":true}!../../../../node_modules/vue-loader/lib/selector.js?type=styles&index=0!./PreviewUpload.vue", function() {
+     var newContent = require("!!../../../../node_modules/css-loader/index.js!../../../../node_modules/vue-loader/lib/style-compiler/index.js?{\"vue\":true,\"id\":\"data-v-fa3dfa7c\",\"scoped\":true,\"hasInlineConfig\":true}!../../../../node_modules/vue-loader/lib/selector.js?type=styles&index=0!./PreviewUpload.vue");
+     if(typeof newContent === 'string') newContent = [[module.id, newContent, '']];
+     update(newContent);
+   });
+ }
+ // When the module is disposed, remove the <style> tags
+ module.hot.dispose(function() { update(); });
+}
+
+/***/ }),
+/* 47 */
+/***/ (function(module, exports, __webpack_require__) {
+
+exports = module.exports = __webpack_require__(48)(false);
+// imports
+
+
+// module
+exports.push([module.i, "\n.upload-preview[data-v-fa3dfa7c]{\n\tborder: 1px solid #e8e8e8;\n\tpadding: 2px;\n\tdisplay: table;\n}\n.upload-trigger[data-v-fa3dfa7c]{\n\tdisplay: table-cell;\n\tvertical-align: middle;\n\ttext-align: center;\n\tcursor: pointer;\n\tcolor: #a8a8a8;\n}\n.file-uploader[data-v-fa3dfa7c]{\n\tdisplay: none;\n}\n.image-preview[data-v-fa3dfa7c]{\n\tposition: relative;\n}\nimg.preview[data-v-fa3dfa7c]{\n\twidth: 100%;\n\theight: 100%;\n}\nspan.remove-image[data-v-fa3dfa7c]{\n\tposition: absolute;\n    top: 5px;\n    right: 5px;\n    background-color: #000;\n    color: #FFF;\n    display: block;\n    width: 20px;\n    height: 20px;\n    opacity: 0.4;\n    border-radius: 10px;\n    cursor: pointer;\n    z-index: 99;\n    text-align: center;\n}\n", ""]);
+
+// exports
+
+
+/***/ }),
 /* 48 */
 /***/ (function(module, exports) {
 
@@ -50649,6 +50687,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 //
 //
 //
+//
 
 /* harmony default export */ __webpack_exports__["default"] = ({
     props: {
@@ -50665,11 +50704,15 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
         name: {
             type: String,
             required: true
+        },
+        loadedImage: {
+            type: String,
+            required: false
         }
     },
     data: function data() {
         return {
-            imageData: "" // we be a base64 format of the image in this string
+            imageData: "" // a base64 format of the image in this string
         };
     },
     computed: {
@@ -50680,6 +50723,10 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
             return this.imageData.length > 0 ? true : false;
         }
     },
+    mounted: function mounted() {
+        if (this.loadedImage) this.imageData = this.loadedImage;
+    },
+
     methods: {
         openUploader: function openUploader(event) {
             var uploader = '#' + this.name;
@@ -50689,6 +50736,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
             var uploader = '#' + this.name;
             this.imageData = '';
             $(uploader).val('');
+            if (this.loadedImage) $("#remove_exitsing_db_image").val(1);
         },
         previewImage: function previewImage(event) {
             var _this = this;
@@ -50717,64 +50765,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 });
 
 /***/ }),
-/* 52 */,
-/* 53 */
-/***/ (function(module, exports) {
-
-// removed by extract-text-webpack-plugin
-
-/***/ }),
-/* 54 */,
-/* 55 */,
-/* 56 */,
-/* 57 */,
-/* 58 */,
-/* 59 */,
-/* 60 */,
-/* 61 */,
-/* 62 */,
-/* 63 */,
-/* 64 */
-/***/ (function(module, exports, __webpack_require__) {
-
-// style-loader: Adds some css to the DOM by adding a <style> tag
-
-// load the styles
-var content = __webpack_require__(65);
-if(typeof content === 'string') content = [[module.i, content, '']];
-if(content.locals) module.exports = content.locals;
-// add the styles to the DOM
-var update = __webpack_require__(49)("6c26e343", content, false, {});
-// Hot Module Replacement
-if(false) {
- // When the styles change, update the <style> tags
- if(!content.locals) {
-   module.hot.accept("!!../../../../node_modules/css-loader/index.js!../../../../node_modules/vue-loader/lib/style-compiler/index.js?{\"vue\":true,\"id\":\"data-v-fa3dfa7c\",\"scoped\":true,\"hasInlineConfig\":true}!../../../../node_modules/vue-loader/lib/selector.js?type=styles&index=0!./PreviewUpload.vue", function() {
-     var newContent = require("!!../../../../node_modules/css-loader/index.js!../../../../node_modules/vue-loader/lib/style-compiler/index.js?{\"vue\":true,\"id\":\"data-v-fa3dfa7c\",\"scoped\":true,\"hasInlineConfig\":true}!../../../../node_modules/vue-loader/lib/selector.js?type=styles&index=0!./PreviewUpload.vue");
-     if(typeof newContent === 'string') newContent = [[module.id, newContent, '']];
-     update(newContent);
-   });
- }
- // When the module is disposed, remove the <style> tags
- module.hot.dispose(function() { update(); });
-}
-
-/***/ }),
-/* 65 */
-/***/ (function(module, exports, __webpack_require__) {
-
-exports = module.exports = __webpack_require__(48)(false);
-// imports
-
-
-// module
-exports.push([module.i, "\n.upload-preview[data-v-fa3dfa7c]{\n\tborder: 1px solid #e8e8e8;\n\tpadding: 2px;\n\tdisplay: table;\n}\n.upload-trigger[data-v-fa3dfa7c]{\n\tdisplay: table-cell;\n\tvertical-align: middle;\n\ttext-align: center;\n\tcursor: pointer;\n\tcolor: #a8a8a8;\n}\n.file-uploader[data-v-fa3dfa7c]{\n\tdisplay: none;\n}\n.image-preview[data-v-fa3dfa7c]{\n\tposition: relative;\n}\nimg.preview[data-v-fa3dfa7c]{\n\twidth: 100%;\n\theight: 100%;\n}\nspan.remove-image[data-v-fa3dfa7c]{\n\tposition: absolute;\n    top: 5px;\n    right: 5px;\n    background-color: #000;\n    color: #FFF;\n    display: block;\n    width: 20px;\n    height: 20px;\n    opacity: 0.4;\n    border-radius: 10px;\n    cursor: pointer;\n    z-index: 99;\n    text-align: center;\n}\n", ""]);
-
-// exports
-
-
-/***/ }),
-/* 66 */
+/* 52 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var render = function() {
@@ -50817,6 +50808,15 @@ var render = function() {
       staticClass: "file-uploader",
       attrs: { type: "file", id: _vm.name, name: _vm.name },
       on: { change: _vm.previewImage }
+    }),
+    _vm._v(" "),
+    _c("input", {
+      attrs: {
+        type: "hidden",
+        name: "remove_exitsing_db_image",
+        id: "remove_exitsing_db_image",
+        value: "0"
+      }
     })
   ])
 }
@@ -50829,6 +50829,12 @@ if (false) {
     require("vue-hot-reload-api")      .rerender("data-v-fa3dfa7c", module.exports)
   }
 }
+
+/***/ }),
+/* 53 */
+/***/ (function(module, exports) {
+
+// removed by extract-text-webpack-plugin
 
 /***/ })
 /******/ ]);

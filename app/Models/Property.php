@@ -85,6 +85,22 @@ class Property extends Model implements HasMedia
     }
 
     /**
+     * Gets the base64 encoded featured image
+     * 
+     * @return type
+     */
+    public function getEncodedFeaturedImageAttribute()
+    {
+        if(!$this->hasMedia('featured'))
+            return null;
+
+        $path =  $this->getFirstMediaPath('featured', 'thumb');
+        $data = file_get_contents($path);
+        $type = pathinfo($path, PATHINFO_EXTENSION);
+        return 'data:image/' . $type . ';base64,' . base64_encode($data);
+    }
+
+    /**
      * Property media collection
      * 
      * @return type

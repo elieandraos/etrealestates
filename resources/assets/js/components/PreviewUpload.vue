@@ -10,6 +10,7 @@
             <img class="preview" :src="imageData">
         </div>
     	<input type="file" :id="name" :name="name" class="file-uploader" @change="previewImage"/>
+    	<input type="hidden" name="remove_exitsing_db_image" id="remove_exitsing_db_image" value="0" />
     </div>
 </template>
 
@@ -29,11 +30,15 @@
             name: {
             	type: String,
             	required: true
+            },
+            loadedImage: {
+            	type: String,
+            	required: false
             }
         },
         data: function () {
 	        return {
-	        	imageData: ""  // we be a base64 format of the image in this string
+	        	imageData: ""  // a base64 format of the image in this string
 	        }
 	    },
         computed: {
@@ -44,6 +49,10 @@
 		    	return (this.imageData.length > 0) ? true : false;
 		    }
 		},
+		mounted() {
+           if(this.loadedImage)
+           		this.imageData = this.loadedImage;
+        },
         methods: {
             openUploader(event) {
                let uploader = '#' + this.name;
@@ -53,6 +62,9 @@
             	let uploader = '#' + this.name;
             	this.imageData = '';
             	$(uploader).val('');
+            	if(this.loadedImage)
+            		$("#remove_exitsing_db_image").val(1);
+
             },
             previewImage(event){
                 // Reference to the DOM input element

@@ -151,7 +151,10 @@
 <div class="row">
     <div class="form-group col-md-4">
         <div>
-            <preview-upload name="featured_image"></preview-upload>
+            <preview-upload 
+                :name="'featured_image'" 
+                @if(isset($property)) :loaded-image="'{!! $property->encoded_featured_image !!}'" @endif
+            ></preview-upload>
         </div>
     </div>
 </div>

@@ -2,20 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Property;
 use Illuminate\Http\Request;
+use App\Http\Resources\PropertyResource;
 
 class HomeController extends Controller
 {
-    /**
-     * Create a new controller instance.
-     *
-     * @return void
-     */
-    public function __construct()
-    {
-        $this->middleware('auth');
-    }
-
     /**
      * Show the application dashboard.
      *
@@ -23,6 +15,8 @@ class HomeController extends Controller
      */
     public function index()
     {
-        return view('home');
+        $data = Property::with('area', 'type')->orderBy('created_at', 'DESC')->paginate(6);
+        $properties = PropertyResource::collection($data);
+        return view('front.home.index', ['properties' => $properties]);
     }
 }

@@ -84,6 +84,15 @@ class Property extends Model implements HasMedia
         return Carbon::parse($this->created_at)->format('d M, Y');
     }
 
+    public function getFeaturedImageThumbUrlAttribute()
+    {
+        if(!$this->hasMedia('featured'))
+            return null;
+
+        $media = $this->getFirstMediaUrl('featured', 'thumb');
+        return url($media);
+    }
+
     /**
      * Gets the base64 encoded featured image
      * 
@@ -121,6 +130,5 @@ class Property extends Model implements HasMedia
                         ->height(576);
                 });
     }
-
-
+    
 }

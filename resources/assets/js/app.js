@@ -21,6 +21,7 @@ Vue.use(VueSwal)
 
 Vue.component('confirm-delete', require('./components/ConfirmDelete.vue'));
 Vue.component('preview-upload', require('./components/PreviewUpload.vue'));
+Vue.component('property-card', require('./components/PropertyCard.vue'));
 
 const app = new Vue({
     el: '#app'

@@ -50721,6 +50721,9 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
         },
         imageIsUploaded: function imageIsUploaded() {
             return this.imageData.length > 0 ? true : false;
+        },
+        remove_identifier: function remove_identifier() {
+            return 'remove_existing_db_' + this.name;
         }
     },
     mounted: function mounted() {
@@ -50734,9 +50737,10 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
         },
         removeImage: function removeImage(event) {
             var uploader = '#' + this.name;
+            var remover = '#' + this.remove_identifier;
             this.imageData = '';
             $(uploader).val('');
-            if (this.loadedImage) $("#remove_exitsing_db_image").val(1);
+            if (this.loadedImage) $("#remover").val(1);
         },
         previewImage: function previewImage(event) {
             var _this = this;
@@ -50754,11 +50758,6 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
                 };
                 // Start the reader job - read file as a data url (base64 format)
                 reader.readAsDataURL(input.files[0]);
-
-                this.$nextTick(function () {
-                    // DOM updated
-                    $('[data-toggle="tooltip"]').tooltip();
-                });
             }
         }
     }
@@ -50788,15 +50787,7 @@ var render = function() {
       ? _c("div", { staticClass: "image-preview" }, [
           _c(
             "span",
-            {
-              staticClass: "remove-image",
-              attrs: {
-                "data-toggle": "tooltip",
-                "data-placement": "top",
-                title: "Change image"
-              },
-              on: { click: _vm.removeImage }
-            },
+            { staticClass: "remove-image", on: { click: _vm.removeImage } },
             [_c("i", { staticClass: "fa fa-close" })]
           ),
           _vm._v(" "),
@@ -50813,8 +50804,8 @@ var render = function() {
     _c("input", {
       attrs: {
         type: "hidden",
-        name: "remove_exitsing_db_image",
-        id: "remove_exitsing_db_image",
+        name: _vm.remove_identifier,
+        id: _vm.remove_identifier,
         value: "0"
       }
     })

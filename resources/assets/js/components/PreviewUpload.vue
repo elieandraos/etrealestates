@@ -4,13 +4,13 @@
     		<i class="fa fa-upload"></i> Click to upload an image
     	</div>
     	<div class="image-preview" v-if="imageIsUploaded">
-    		<span class="remove-image" @click="removeImage" data-toggle="tooltip" data-placement="top" title="Change image">
+    		<span class="remove-image" @click="removeImage">
     			<i class="fa fa-close"></i>
     		</span>
             <img class="preview" :src="imageData">
         </div>
     	<input type="file" :id="name" :name="name" class="file-uploader" @change="previewImage"/>
-    	<input type="hidden" name="remove_exitsing_db_image" id="remove_exitsing_db_image" value="0" />
+    	<input type="hidden" :name="remove_identifier" :id="remove_identifier" value="0" />
     </div>
 </template>
 
@@ -47,6 +47,9 @@
 		    },
 		    imageIsUploaded: function () {
 		    	return (this.imageData.length > 0) ? true : false;
+		    },
+		    remove_identifier: function () {
+		    	return 'remove_existing_db_' + this.name;
 		    }
 		},
 		mounted() {
@@ -60,10 +63,11 @@
             },
             removeImage(event){
             	let uploader = '#' + this.name;
+            	let remover = '#' + this.remove_identifier;
             	this.imageData = '';
             	$(uploader).val('');
             	if(this.loadedImage)
-            		$("#remove_exitsing_db_image").val(1);
+            		$("#remover").val(1);
 
             },
             previewImage(event){
@@ -80,11 +84,6 @@
 	                }
 	                // Start the reader job - read file as a data url (base64 format)
 	                reader.readAsDataURL(input.files[0]);
-	                
-	                this.$nextTick(function () {
-					  	// DOM updated
-	                	$('[data-toggle="tooltip"]').tooltip();
-					})
 	            }
 	        }
         },

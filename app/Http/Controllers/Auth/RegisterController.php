@@ -31,6 +31,17 @@ class RegisterController extends Controller
     protected $redirectTo = '/home';
 
     /**
+     * Disable registration
+     * 
+     * @return type
+     */
+    public function showRegistrationForm()
+    {
+        return redirect('login');
+    }
+
+
+    /**
      * Create a new controller instance.
      *
      * @return void

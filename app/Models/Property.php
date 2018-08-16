@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Carbon\Carbon;
+use App\Andraos\Traits\Filterable;
 use Spatie\MediaLibrary\Models\Media;
 use Illuminate\Database\Eloquent\Model;
 use Spatie\MediaLibrary\HasMedia\HasMedia;
@@ -10,7 +11,7 @@ use Spatie\MediaLibrary\HasMedia\HasMediaTrait;
 
 class Property extends Model implements HasMedia
 {
-    use HasMediaTrait;
+    use HasMediaTrait, Filterable;
 
     protected $table = 'properties';
 

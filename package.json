@@ -11,7 +11,8 @@
   },
   "dependencies": {
     "bootstrap-select": "^1.12.4",
-    "font-awesome": "^4.7.0"
+    "font-awesome": "^4.7.0",
+    "vue-infinite-loading": "^2.3.3"
   },
   "devDependencies": {
     "axios": "^0.18",

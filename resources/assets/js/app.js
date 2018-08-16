@@ -22,7 +22,7 @@ Vue.use(VueSwal)
 
 Vue.component('confirm-delete', require('./components/ConfirmDelete.vue'));
 Vue.component('preview-upload', require('./components/PreviewUpload.vue'));
-Vue.component('property-card', require('./components/PropertyCard.vue'));
+Vue.component('properties', require('./components/Properties.vue'));
 Vue.component('properties-filter', require('./components/PropertiesFilter.vue'));
 
 const app = new Vue({
@@ -49,8 +49,14 @@ $(document).ready(function(){
 	    "value_bar_selector": ".bar",
 	    "value_changed_callback": function(cause, leftValue, rightValue) {
 	        var $container = $(this).parent();
-	        $container.find('.leftLabel').text(String(leftValue).number_format());
-	        $container.find('.rightLabel').text(String(rightValue).number_format());
+	        $("#min_price").val(leftValue);
+	        $("#max_price").val(rightValue);
+
+	        $("#min_price")[0].dispatchEvent(new Event('change'));
+	        $("#max_price")[0].dispatchEvent(new Event('change'));
+
+	        $container.find('.leftLabel').text(String($("#min_price").val()).number_format());
+	        $container.find('.rightLabel').text(String($("#max_price").val()).number_format());
 	    }
 	});
 })

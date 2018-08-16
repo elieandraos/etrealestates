@@ -10,20 +10,15 @@
 					<properties-filter
 						:areas="'{{ json_encode($areas) }}'"
 						:types="'{{ json_encode($types) }}'"
+						:csrf="'{{ csrf_token() }}'"
 					>
-					</properties-filter>	
+					</properties-filter>
 				</div>
 			</div>
 		</div>
 	</div>
 </div>
 <div class="container">
-    <div class="row" id="properties-listing">
-        @foreach($properties as $property)
-	        <div class="col-md-4">
-	            <property-card :content="'{{ json_encode($property) }}'"></property-card>
-	        </div>
-        @endforeach
-    </div>
+	<properties></properties>
 </div>
 @endsection

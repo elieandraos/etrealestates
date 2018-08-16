@@ -55,7 +55,7 @@
 		    }
 		},
 		mounted() {
-        	this.property = JSON.parse(this.content);
+        	this.property = this.content;
         },
         methods: {
             getSuffix(value) {

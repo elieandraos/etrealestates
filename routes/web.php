@@ -12,6 +12,7 @@
 */
 
 Route::get('/', 'HomeController@index')->name('home');
+Route::post('/properties/fetch', 'HomeController@fetch')->name('home.fetch');
 
 Auth::routes();
 

@@ -5,8 +5,8 @@
 			</div>
 			<infinite-loading @infinite="infiniteHandler" ref="infiniteLoading">
 				 <span slot="no-more"></span>
-				 <div slot="spinner" class="col-md-12">>
-				 	<center>Loading properties matching your criteria, please be patient</center>
+				 <div slot="spinner" class="col-md-12" style="padding: 30px;">
+				 	<center><img src="/ajax-loader.gif" /></center>
 				 </div>
 			</infinite-loading>
 	 </div>
@@ -28,8 +28,7 @@
                 payload: {
 	        		area: -1,
 	        		type: -1,
-	        		minAmount: 90000,
-	        		maxAmount: 400000,
+	        		maxAmount: -1,
 	        	},
                 link: '',
                 total: 0,

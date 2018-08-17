@@ -20,10 +20,17 @@ class HomeController extends Controller
     {
         $types = Type::orderBy('name', 'ASC')->pluck('name', 'id');
         $areas = Area::orderBy('name', 'ASC')->pluck('name', 'id');
- 
+        $price_ranges = [
+            '100000' => 'Up to 100,000 $',
+            '250000' => 'Up to 250,000 $',
+            '400000' => 'Up to 400,000 $',
+            '1000000' => 'Up to 1,000,000 $',
+        ];
+
         return view('front.home.index', [
-                'types' => $types, 
-                'areas' => $areas 
+            'types' => $types, 
+            'areas' => $areas,
+            'price_ranges' => $price_ranges 
         ]);
     }
 
@@ -39,7 +46,6 @@ class HomeController extends Controller
                             ->filter(new PropertyFilter( [
                                 'area' => $request->get('area'),
                                 'type' => $request->get('type'),
-                                'minAmount' => $request->get('minAmount'),
                                 'maxAmount'  => $request->get('maxAmount'),
                             ]))
                             ->orderBy('created_at', 'DESC')->paginate(6);

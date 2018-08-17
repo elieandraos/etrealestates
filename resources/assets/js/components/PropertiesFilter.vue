@@ -19,22 +19,11 @@
 				</div>
 
 				<div class="filter-item">
-					<label>
-						Price Range:
-						<div class="price text-right">
-			                  <span>$</span>
-			                  <div class="leftLabel"></div>
-			                  <span>to $</span>
-			                  <div class="rightLabel"></div>
-			            </div>
-		            </label>
-					<div class="nstSlider" data-range_min="0" data-range_max="500000" :data-cur_min="payload.minAmount"  :data-cur_max="payload.maxAmount">
-					    <div class="bar"></div>
-					    <div class="leftGrip"></div>
-					    <div class="rightGrip"></div>
-					</div>
-					<input type="hidden" name="min_price" id="min_price" v-model.lazy="payload.minAmount" />
-					<input type="hidden" name="max_price" id="max_price" v-model.lazy="payload.maxAmount" />
+					<label>Price Range:</label>
+					<select name="maxAmount" class="selectpicker" v-model="payload.maxAmount">
+						<option value="-1">All Prices</option>
+						<option v-for="(value, key) in filters.prices" :value="key">{{ value }}</option>
+					</select>
 				</div>
 
 				<div class="filter-item" style="vertical-align: middle">
@@ -56,6 +45,9 @@
             areas: {
                 required: true,
             },
+            priceRanges: {
+                required: true,
+            },
             types: {
                 required: true,
             },
@@ -68,13 +60,13 @@
 	        	payload: {
 	        		area: -1,
 	        		type: -1,
-	        		minAmount: 90000,
-	        		maxAmount: 400000,
+	        		maxAmount: -1,
 	        		_token: this.csrf
 	        	},
 	        	filters: {
 	        		areas: {},
 	        		types: {},
+	        		prices: {}
 	        	}
 	        }
 	    },
@@ -89,6 +81,7 @@
 		mounted() {
         	this.filters.areas = JSON.parse(this.areas);
         	this.filters.types = JSON.parse(this.types);
+        	this.filters.prices = JSON.parse(this.priceRanges);
         },
         methods: {
             handleSubmit() {

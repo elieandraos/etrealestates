@@ -32,16 +32,6 @@ class PropertyFilter extends QueryFilter
         return $this->builder->where('type_id', $value);
     }
 
-    /**
-     * Filter by minimum amount
-     * 
-     * @param type $value 
-     * @return type
-     */
-    public function minAmount($value)
-    {
-        return $this->builder->where('amount', '>=', $value);
-    }
 
     /**
      * Filter by maximum amount
@@ -51,6 +41,9 @@ class PropertyFilter extends QueryFilter
      */
     public function maxAmount($value)
     {
+        if($value == -1)
+            return $this->builder;
+        
         return $this->builder->where('amount', '<=', $value);
     }
 }

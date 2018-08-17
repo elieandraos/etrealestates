@@ -129,39 +129,4 @@ div.filter-item label{
 	color: #FFF;
 }
 /** End Of Homepage filters **/
-
-/** Range Slider Customization **/
-div.filter-item div.nstSlider{
-	height: 12px;
-    margin-top: 15px;
-    clear: both !important;
-    background-color: #e1e7ec;
-    box-shadow: inset 1px 1px 1px rgba(0, 0, 0, 0.2);
-    max-width: 240px;
-}
-div.filter-item div.nstSlider .bar{
-	height: 12px;
-    top: 0;
-    background-color: #666;
-    max-width: 240px;
-}
-div.filter-item div.nstSlider .rightGrip,
-div.filter-item div.nstSlider .leftGrip{
-	background-color: #fff;
-    height: 20px;
-    top: -5px;
-    width: 20px;
-}
-.price{
-	display: inline-block;
-    float: right;
-    color: #FFF;
-    font-size: 14px;
-}
-.leftLabel, .rightLabel {
-    color: #FFF;
-    display: inline-block;
-}
-/** End Of Range Slider Customization **/
-
 </style>

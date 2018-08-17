@@ -10,7 +10,6 @@ require('./bootstrap');
 import Vue from 'vue';
 import VueSwal from 'vue-swal';
 require('bootstrap-select');
-require('./jquery.nstSlider');
 
 Vue.use(VueSwal)
 
@@ -36,28 +35,6 @@ $(document).ready(function(){
 	 	'showTick' : true,
 	 	'tickIcon' : 'fa-check',
 	 	'iconBase' : 'fa'
-	});
-
-	$('.nstSlider').nstSlider({
-	    "rounding": {
-	        "100": "1000",
-	        "1000": "10000",
-	        "10000": "100000"
-	    },
-	    "left_grip_selector": ".leftGrip",
-	    "right_grip_selector": ".rightGrip",
-	    "value_bar_selector": ".bar",
-	    "value_changed_callback": function(cause, leftValue, rightValue) {
-	        var $container = $(this).parent();
-	        $("#min_price").val(leftValue);
-	        $("#max_price").val(rightValue);
-
-	        $("#min_price")[0].dispatchEvent(new Event('change'));
-	        $("#max_price")[0].dispatchEvent(new Event('change'));
-
-	        $container.find('.leftLabel').text(String($("#min_price").val()).number_format());
-	        $container.find('.rightLabel').text(String($("#max_price").val()).number_format());
-	    }
 	});
 })
 

@@ -24,6 +24,7 @@ Vue.component('preview-upload', require('./components/PreviewUpload.vue'));
 Vue.component('properties', require('./components/Properties.vue'));
 Vue.component('properties-filter', require('./components/PropertiesFilter.vue'));
 Vue.component('property-feature', require('./components/PropertyFeature.vue'));
+Vue.component('property-card', require('./components/PropertyCard.vue'));
 Vue.component('google-maps-locator', require('./components/GoogleMapsLocationSelector.vue'));
 
 const app = new Vue({

@@ -53,12 +53,22 @@ class HomeController extends Controller
         return PropertyResource::collection($data);
     }
 
+    /**
+     * Show property
+     * 
+     * @param Request $request 
+     * @param type $reference 
+     * @return type
+     */
     public function show(Request $request, $reference)
     {
         $property = Property::with(['area', 'type'])->where('reference', $reference)->first();
         if(!$property)
             abort('404');
 
-        return view('front.home.show', ['property' => $property]);
+        $data = Property::related($property)->get();
+        $relatedProperties  = PropertyResource::collection($data);
+        
+        return view('front.home.show', ['property' => $property, 'relatedProperties' => $relatedProperties]);
     }
 }

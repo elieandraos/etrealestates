@@ -140,6 +140,26 @@ class Property extends Model implements HasMedia
     }
 
     /**
+     * Related properties scope
+     * 
+     * @param type $query 
+     * @param type $property 
+     * @return type
+     */
+    public function scopeRelated($query, $property)
+    {
+        if(!$property)
+            return $query;
+
+        return $query->where('area_id', '=', $property->area_id)
+                        ->where('type_id', $property->type_id)
+                        ->where('id', '!=', $property->id)
+                        ->orderBy('created_at', 'DESC')
+                        ->take(3);
+    }
+
+
+    /**
      * Property media collection
      * 
      * @return type

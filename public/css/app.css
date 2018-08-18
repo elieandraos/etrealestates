@@ -10955,6 +10955,25 @@ h2.subtitle {
 
 /** End Single Property **/
 
+/** Section Separator **/
+
+.section-header {
+  margin-top: 50px;
+  margin-bottom: 50px;
+  text-align: center;
+}
+
+.section-title {
+  display: inline;
+  color: #666;
+  font-size: 30px;
+  text-transform: uppercase;
+  font-family: "Roboto Condensed";
+  padding-top: 10px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #999;
+}
+
 select.bs-select-hidden,
 .bootstrap-select > select.bs-select-hidden,
 select.selectpicker {

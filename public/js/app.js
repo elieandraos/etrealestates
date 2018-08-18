@@ -25318,6 +25318,7 @@ __WEBPACK_IMPORTED_MODULE_0_vue___default.a.component('preview-upload', __webpac
 __WEBPACK_IMPORTED_MODULE_0_vue___default.a.component('properties', __webpack_require__(54));
 __WEBPACK_IMPORTED_MODULE_0_vue___default.a.component('properties-filter', __webpack_require__(66));
 __WEBPACK_IMPORTED_MODULE_0_vue___default.a.component('property-feature', __webpack_require__(72));
+__WEBPACK_IMPORTED_MODULE_0_vue___default.a.component('property-card', __webpack_require__(59));
 __WEBPACK_IMPORTED_MODULE_0_vue___default.a.component('google-maps-locator', __webpack_require__(77));
 
 var app = new __WEBPACK_IMPORTED_MODULE_0_vue___default.a({
@@ -51203,6 +51204,10 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
     props: {
         content: {
             required: true
+        },
+        parse: {
+            required: false,
+            default: false
         }
     },
     data: function data() {
@@ -51218,7 +51223,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
         }
     },
     mounted: function mounted() {
-        this.property = this.content;
+        if (this.parse) this.property = JSON.parse(this.content);else this.property = this.content;
     },
 
     methods: {

@@ -34,6 +34,19 @@
 			<property-feature :text="'Number of parkings'" :fa-icon="'fa-car'" :value="'{!! $property->nb_parkings !!}'"></property-feature>
 		</div>
 	</div>
+
+	@if($relatedProperties->count())
+		<div class="row">
+			<div class="col-md-12 section-header">
+				<h3 class="section-title">Related properties</h3>
+			</div>
+			@foreach($relatedProperties as $relatedProperty)
+				<div class="col-md-4">
+					<property-card :content="'{{ json_encode($relatedProperty) }}'" :parse=true></property-card>
+				</div>
+			@endforeach
+		</div>
+	@endif
 </div>	
 
 @endsection

@@ -41,6 +41,10 @@
         props: {
             content: {
                 required: true,
+            },
+            parse: {
+            	required: false,
+            	default: false
             }
         },
         data: function () {
@@ -57,7 +61,10 @@
 		    }
 		},
 		mounted() {
-        	this.property = this.content;
+			if(this.parse)
+				this.property = JSON.parse(this.content);
+			else
+        		this.property = this.content;
         },
         methods: {
             getSuffix(value) {

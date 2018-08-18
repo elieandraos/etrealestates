@@ -7,7 +7,7 @@
 		<div class="col-md-12">
 			<h1 class="title">{!! $property->title !!}</h1>
 			<h2 class="subtitle">
-				{!! $property->area->name !!}, {!! $property->city !!}
+				{!! $property->city !!}, {!! $property->area->name !!}
 				@if($property->has_map_credentials)
 					<a href="https://www.google.com/maps/?q={!! $property->lat!!},{!! $property->lng!!}" target="_blank">
 						<i class="fa fa-map-marker" style="color: #e8453c" data-toggle="tooltip" data-placement="top" title="View location on map"></i>

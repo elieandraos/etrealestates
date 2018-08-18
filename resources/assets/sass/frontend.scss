@@ -1,3 +1,4 @@
+/** Single Property **/
 h1.title{
 	font-size: 44px;
     padding: 0;
@@ -37,3 +38,34 @@ h2.subtitle{
     margin-bottom: 30px;
     text-align: center;
 }
+.property-full-image{
+    position: relative;
+}
+.property-full-image .listed-for{
+    background-color: #FFD119;
+    position: absolute;
+    top: 20px;
+    right: 40px;
+    display: inline-block;
+    z-index: 1;
+    font-size: 17px;
+    padding: 5px 14px;
+    color: #333;
+    font-weight: 400;
+    text-transform: uppercase;
+    font-family: "Roboto Condensed"
+}
+.property-full-image .price{
+    background-color: #173471;
+    position: absolute;
+    bottom: 0px;
+    right: 15px;
+    display: inline-block;
+    color: #FFF;
+    padding: 8px 15px;
+    font-size: 26px;
+    font-weight: 400;
+    min-width: 100px;
+    text-align: center;
+}
+/** End Single Property **/

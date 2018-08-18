@@ -18,8 +18,10 @@
 	</div>
 
 	<div class="row property-show-container">
-		<div class="col-md-8">
+		<div class="col-md-8 property-full-image">
 			<img class="feature-image-full" src="{!! $property->featured_image_url !!}" />
+			<span class="listed-for">For {!! $property->listed_for !!}</span>
+			<span class="price">{!! $property->amount !!} $</span>
 		</div>
 		<div class="col-md-4 property-details">
 			<p class="description">{!! $property->description !!} </p>

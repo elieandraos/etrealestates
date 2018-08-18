@@ -52,4 +52,13 @@ class HomeController extends Controller
 
         return PropertyResource::collection($data);
     }
+
+    public function show(Request $request, $reference)
+    {
+        $property = Property::with(['area', 'type'])->where('reference', $reference)->first();
+        if(!$property)
+            abort('404');
+
+        return view('front.home.show', ['property' => $property]);
+    }
 }

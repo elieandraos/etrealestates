@@ -143,19 +143,41 @@
 <div class="row">
     <div class="col-md-12">
         <div class="form-heading">
-            Featured Image <i class="fa fa-question-circle-o" data-toggle="tooltip" data-placement="top" title="should respect 768x576 ratio"></i>
+            Other information
         </div>  
     </div>
 </div>
 
 <div class="row">
-    <div class="form-group col-md-4">
+    <div class="form-group{{ $errors->has('description') ? ' has-error' : '' }} col-md-4">
+        <label for="description" class="control-label">Description</label>
         <div>
-            <preview-upload 
-                :name="'featured_image'" 
-                @if(isset($property)) :loaded-image="'{!! $property->encoded_featured_image !!}'" @endif
-            ></preview-upload>
+            {!! Form::textarea('description', old('description'), [ 'class' => 'form-control', 'id' => 'property-description'] ) !!}
+            @if ($errors->has('description'))
+                <span class="help-block">{{ $errors->first('description') }}</span>
+            @endif
         </div>
+    </div>
+
+     <div class="form-group col-md-4">
+        <label for="description" class="control-label">
+            Featured Image <i class="fa fa-question-circle-o" data-toggle="tooltip" data-placement="top" title="should respect 768x576 ratio"></i>
+        </label>
+        <preview-upload 
+            :name="'featured_image'" 
+            @if(isset($property)) :loaded-image="'{!! $property->encoded_featured_image !!}'" @endif
+        ></preview-upload>
+    </div>
+
+     <div class="form-group{{ $errors->has('description') ? ' has-error' : '' }} col-md-4">
+        <label for="description" class="control-label">
+            Map Location <i class="fa fa-question-circle-o" data-toggle="tooltip" data-placement="top" title="For better placement, enlarge the map by clicking at the top right icon"></i>
+        </label>
+        <google-maps-locator 
+            @if(isset($property)) :latitude="'{!! $property->lat !!}'" @endif
+            @if(isset($property)) :longitude="'{!! $property->lng !!}'" @endif
+        >
+        </google-maps-locator>
     </div>
 </div>
 

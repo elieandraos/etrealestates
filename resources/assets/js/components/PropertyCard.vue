@@ -1,9 +1,11 @@
 <template>
 	<div class="card-content">
 		<div class="card-header">
-	    	<img :src="property.thumb" class="thumb" />
-	    	<span class="listed-for">{{property.listed_for}}</span>
-	    	<span class="price">{{ property.price }}</span>
+	    	<a :href="property.url">
+		    	<img :src="property.thumb" class="thumb" />
+		    	<span class="listed-for">{{property.listed_for}}</span>
+		    	<span class="price">{{ property.price }}</span>
+		    </a>
 	    </div>
 	    <div class="card-body">
 	    	<h2 class='title'>{{ property.title }}</h2>

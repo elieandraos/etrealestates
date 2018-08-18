@@ -26,7 +26,9 @@ class PropertyResource extends JsonResource
             'nb_parkings' => $this->nb_parkings,
             'nb_bedrooms' => $this->nb_bedrooms,
             'sq_ft' => $this->sq_ft,
-            'posted_at' => $this->created_at->diffForHumans()
+            'reference' => $this->reference,
+            'posted_at' => $this->created_at->diffForHumans(),
+            'url'   => route('home.show', $this->reference),
         ];
     }
 }

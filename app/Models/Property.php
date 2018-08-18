@@ -85,6 +85,11 @@ class Property extends Model implements HasMedia
         return Carbon::parse($this->created_at)->format('d M, Y');
     }
 
+    /***
+     * Accessor for thumb featured image url
+     
+     * @return type
+     */
     public function getFeaturedImageThumbUrlAttribute()
     {
         if(!$this->hasMedia('featured'))
@@ -92,6 +97,30 @@ class Property extends Model implements HasMedia
 
         $media = $this->getFirstMediaUrl('featured', 'thumb');
         return url($media);
+    }
+
+    /***
+     * Accessor for full featured image url
+
+     * @return type
+     */
+    public function getFeaturedImageUrlAttribute()
+    {
+        if(!$this->hasMedia('featured'))
+            return null;
+
+        $media = $this->getFirstMediaUrl('featured', 'full');
+        return url($media);
+    }
+
+    /***
+     * Accessor to check if the property has map information
+
+     * @return type
+     */
+    public function getHasMapCredentialsAttribute()
+    {
+        return ($this->lat && $this->lng) ? true : false;
     }
 
     /**

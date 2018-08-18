@@ -10683,6 +10683,12 @@ input:-webkit-autofill:focus {
   margin-top: 30px;
 }
 
+.form-group textarea {
+  height: 240px;
+  line-height: 22px !important;
+  padding: 10px !important;
+}
+
 /** End of forms **/
 
 /** Tables **/
@@ -10866,6 +10872,51 @@ div.bootstrap-select .dropdown-menu > .active > a:focus {
 }
 
 /** End of bootsrap select customization **/
+
+h1.title {
+  font-size: 44px;
+  padding: 0;
+  margin: 0;
+  font-family: "Roboto Condensed";
+  color: #000;
+  text-transform: capitalize;
+  font-weight: 400;
+}
+
+h2.subtitle {
+  font-size: 28px;
+  color: #676767;
+  margin: 0;
+  padding: 0;
+  font-family: "Roboto Condensed";
+}
+
+.property-show-container {
+  padding-top: 30px;
+}
+
+.property-show-container .property-details {
+  background-color: #FFF;
+}
+
+.property-details .description {
+  font-size: 14px;
+  line-height: 24px;
+  padding: 15px;
+  color: #999;
+  margin: 0;
+}
+
+.feature-image-full {
+  width: 100%;
+  height: auto;
+}
+
+.property-details div.inquiry {
+  margin-top: 10px;
+  margin-bottom: 30px;
+  text-align: center;
+}
 
 select.bs-select-hidden,
 .bootstrap-select > select.bs-select-hidden,

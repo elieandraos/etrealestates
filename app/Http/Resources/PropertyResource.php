@@ -29,6 +29,7 @@ class PropertyResource extends JsonResource
             'reference' => $this->reference,
             'posted_at' => $this->created_at->diffForHumans(),
             'url'   => route('home.show', $this->reference),
+            'featured' => (bool) $this->is_featured
         ];
     }
 }

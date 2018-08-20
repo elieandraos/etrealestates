@@ -47,8 +47,11 @@ class HomeController extends Controller
                                 'area' => $request->get('area'),
                                 'type' => $request->get('type'),
                                 'maxAmount'  => $request->get('maxAmount'),
+                                'published' => true
                             ]))
-                            ->orderBy('created_at', 'DESC')->paginate(6);
+                            ->orderBy('is_featured', 'DESC')
+                            ->orderBy('created_at', 'DESC')
+                            ->paginate(6);
 
         return PropertyResource::collection($data);
     }

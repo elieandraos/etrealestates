@@ -5,6 +5,7 @@
 		    	<img :src="property.thumb" class="thumb" />
 		    	<span class="listed-for">{{property.listed_for}}</span>
 		    	<span class="price">{{ property.price }}</span>
+		    	<span class="featured" v-if="property.featured">featured</span>
 		    </a>
 	    </div>
 	    <div class="card-body">
@@ -102,6 +103,19 @@
 	    font-size: 10px;
 	    padding: 5px 14px;
 	    color: #333;
+	    font-weight: 400;
+    	text-transform: uppercase;
+	}
+	.card-content .card-header .featured{
+		background-color: #e64942;
+		position: absolute;
+	    top: 10px;
+	    left: 10px;
+	    display: inline-block;
+	    z-index: 1;
+	    font-size: 10px;
+	    padding: 5px 14px;
+	    color: #FFF;
 	    font-weight: 400;
     	text-transform: uppercase;
 	}

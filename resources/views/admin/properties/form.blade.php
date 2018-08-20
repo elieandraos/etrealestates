@@ -181,6 +181,44 @@
     </div>
 </div>
 
+<div class="row">
+    <div class="col-md-12">
+        <div class="form-heading">Display options</div>  
+    </div>
+</div>
+
+<div class="row">
+    <div class="form-group{{ $errors->has('is_featured') ? ' has-error' : '' }} col-md-4">
+        <label for="area_id" class="control-label">Featured Status</label>
+        <div>
+            {!! Form::select(
+                'is_featured', 
+                $featuredOptions, 
+                null , 
+                ['class' => 'selectpicker full-width', 'id' => 'is_featured']
+            ) !!}
+            @if ($errors->has('is_featured'))
+                <span class="help-block">{{ $errors->first('is_featured') }}</span>
+            @endif
+        </div>
+    </div>
+
+    <div class="form-group{{ $errors->has('is_published') ? ' has-error' : '' }} col-md-4">
+        <label for="area_id" class="control-label">Published Status</label>
+        <div>
+            {!! Form::select(
+                'is_published', 
+                $publishedOptions, 
+                null , 
+                ['class' => 'selectpicker full-width', 'id' => 'is_published']
+            ) !!}
+            @if ($errors->has('is_published'))
+                <span class="help-block">{{ $errors->first('is_published') }}</span>
+            @endif
+        </div>
+    </div>
+</div>
+
 <div class="form-group buttons">
     <div class="col-md-8 col-md-offset-4">
         <button type="submit" class="btn btn-primary">

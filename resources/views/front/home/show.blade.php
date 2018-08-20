@@ -22,6 +22,7 @@
 			<img class="feature-image-full" src="{!! $property->featured_image_url !!}" />
 			<span class="listed-for">For {!! $property->listed_for !!}</span>
 			<span class="price">{!! $property->amount !!} $</span>
+			@if($property->is_featured) <span class="featured">Featured</span> @endif
 		</div>
 		<div class="col-md-4 property-details">
 			<p class="description">{!! $property->description !!} </p>

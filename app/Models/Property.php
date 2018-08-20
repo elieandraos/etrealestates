@@ -36,7 +36,9 @@ class Property extends Model implements HasMedia
         'listed_for',
         'area_id',
         'type_id',
-        'listed_by'
+        'listed_by',
+        'is_featured',
+        'is_published'
     ];
 
     /**

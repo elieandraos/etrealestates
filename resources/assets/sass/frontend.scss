@@ -55,6 +55,20 @@ h2.subtitle{
     text-transform: uppercase;
     font-family: "Roboto Condensed"
 }
+.property-full-image .featured{
+    background-color: #e64942;
+    position: absolute;
+    top: 20px;
+    left: 40px;
+    display: inline-block;
+    z-index: 1;
+    font-size: 17px;
+    padding: 5px 14px;
+    color: #FFF;
+    font-weight: 400;
+    text-transform: uppercase;
+    font-family: "Roboto Condensed"
+}
 .property-full-image .price{
     background-color: #173471;
     position: absolute;

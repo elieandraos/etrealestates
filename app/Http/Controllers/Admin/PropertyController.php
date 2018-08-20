@@ -23,7 +23,16 @@ class PropertyController extends Controller
     {
         $types = Type::orderBy('name', 'ASC')->pluck('name', 'id');
         $areas = Area::orderBy('name', 'ASC')->pluck('name', 'id');
-    	return view('admin.properties.create', ['types' => $types, 'areas' => $areas]);
+        $featuredOptions = [ 0 => 'Not Featured', 1 => 'Is Featured' ];
+        $publishedOptions = [ 0 => 'Not Published', 1 => 'Is Published' ];
+        
+        return view('admin.properties.edit', [
+                    'types' => $types, 
+                    'areas' => $areas, 
+                    'property' => $property, 
+                    'featuredOptions' => $featuredOptions,
+                    'publishedOptions' => $publishedOptions,
+        ]);
     }
 
     public function store(PropertyRequest $request) 
@@ -44,8 +53,16 @@ class PropertyController extends Controller
 		$property = Property::findOrFail($propertyId);
         $types = Type::orderBy('name', 'ASC')->pluck('name', 'id');
         $areas = Area::orderBy('name', 'ASC')->pluck('name', 'id');
+        $featuredOptions = [ 0 => 'Not Featured', 1 => 'Is Featured' ];
+        $publishedOptions = [ 0 => 'Not Published', 1 => 'Is Published' ];
 
-        return view('admin.properties.edit', ['types' => $types, 'areas' => $areas, 'property' => $property]);
+        return view('admin.properties.edit', [
+                    'types' => $types, 
+                    'areas' => $areas, 
+                    'property' => $property, 
+                    'featuredOptions' => $featuredOptions,
+                    'publishedOptions' => $publishedOptions,
+        ]);
 	}
 
 	public function update(PropertyRequest $request, $propertyId)

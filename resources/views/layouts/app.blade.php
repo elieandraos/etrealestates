@@ -21,6 +21,12 @@
 
     <!-- Styles -->
     <link href="{{ asset('css/app.css') }}" rel="stylesheet">
+
+    <!-- SEO Meta Tags -->
+    @guest
+        {!! SEO::generate() !!}
+    @endguest
+
 </head>
 <body>
     <div id="app">

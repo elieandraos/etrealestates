@@ -16,7 +16,7 @@
 	    		<div class="container">
 		    		<div class="row">
 		    			<div class="col-md-6 detail">
-		    				<span><i class="fa fa-object-group"></i> {{ property.sq_ft}} m<sup>2</sup></span>
+		    				<span><i class="fa fa-object-group"></i> {{ property.sq_ft}} <span class="low">m</span><sup>2</sup></span>
 		    			</div>
 		    			<div class="col-md-6 detail" v-if="property.nb_bedrooms">
 		    				<span><i class="fa fa-bed"></i> {{ property.nb_bedrooms}} bedroom{{ this.getSuffix(property.nb_bedrooms)}}</span>
@@ -177,5 +177,8 @@
 	}
 	.card-content .card-footer i.fa{
 		margin-right: 5px;
+	}
+	.card-content .card-body .details span span.low{
+		text-transform: lowercase;
 	}
 </style>

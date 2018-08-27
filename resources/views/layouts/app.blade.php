@@ -67,6 +67,33 @@
         <main class="@if(URL::current() != URL::to('/')) py-4 @endif">
             @yield('content')
         </main>
+
+        <div class="container-fluid footer">
+            <div class="row">
+                <div class="container">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <span class="footer-icon"><i class="fa fa-phone"></i></span>
+                            <span class="footer-title">Phone Number</span>
+                            <span class="footer-text">+961 3 140 625</span>
+                        </div>
+                        <div class="col-md-4">
+                            <span class="footer-icon"><i class="fa fa-map-marker"></i></span>
+                            <span class="footer-title">Location</span>
+                            <span class="footer-text">Sarba, Jounieh</span>
+                        </div>
+                        <div class="col-md-4">
+                            <span class="footer-icon"><i class="fa fa-envelope-o"></i></span>
+                            <span class="footer-title">Email Address</span>
+                            <span class="footer-text">info@etrealeastes.com</span>
+                        </div>
+                        <div class="col-md-12 copyright">
+                            Copyright © {!! date('Y') !!} EtRealEstates. All rights reserved.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </body>
 </html>

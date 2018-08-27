@@ -100,3 +100,37 @@ h2.subtitle{
     padding-bottom: 10px;
     border-bottom: 1px solid #999;
 }
+/** End Section Separator **/
+
+/** Footer **/
+.footer{
+    background-color: #404040;
+    color: #FFF;
+    padding-top: 40px;
+    padding-bottom: 60px;
+    margin-top: 200px;
+    opacity: 0.85;
+}
+.footer .footer-icon{
+    font-size: 48px;
+    display: block;
+    text-align: center;
+}
+.footer .footer-title{
+    font-size: 24px;
+    display: block;
+    text-align: center;
+    font-family: "Roboto Condensed";
+}
+.footer .footer-text{
+    font-size: 14px;
+    display: block;
+    text-align: center;
+}
+div.footer div.copyright{
+    text-align: center;
+    margin-top: 30px;
+}
+/** End Footer **/
+
+

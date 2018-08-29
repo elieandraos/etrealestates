@@ -66,6 +66,15 @@ export default {
     computed: {
     	hasErrors: function () {
     		return (this.errors.length) ? true : false;
+    	},
+    	payload: function() {
+    		return {
+    			name: this.name,
+    			email: this.email,
+    			phone: this.phone,
+    			message: this.message,
+    			reference: this.propertyReference
+    		}
     	}
     },
     methods: {
@@ -102,10 +111,10 @@ export default {
             if (this.hasErrors) 
             	return;
 
-            // axios.post('/inquire', this.payload)
-            //         .then(function(response){
-            //         	this.inquirySent = true;
-            //         });
+            axios.post('/inquire', this.payload)
+                    .then((response) => {
+                    	this.inquirySent = true;
+                    });
         }
     }
 };

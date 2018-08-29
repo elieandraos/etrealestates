@@ -10873,6 +10873,76 @@ div.bootstrap-select .dropdown-menu > .active > a:focus {
 
 /** End of bootsrap select customization **/
 
+.v--modal-overlay .v--modal-box {
+  border-radius: 6px;
+}
+
+.v-modal-header {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: start;
+      -ms-flex-align: start;
+          align-items: flex-start;
+  -webkit-box-pack: justify;
+      -ms-flex-pack: justify;
+          justify-content: space-between;
+  padding: 1rem;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.v-modal-header .v-modal-title {
+  margin-bottom: 0;
+  line-height: 1.6;
+}
+
+.v-modal-header .v-close,
+.v-modal-header .v-close:focus {
+  padding: 1rem;
+  margin: -1rem -1rem -1rem auto;
+  cursor: pointer;
+  float: right;
+  font-size: 1.5rem;
+  font-weight: 700;
+  line-height: 1;
+  color: #000;
+  text-shadow: 0 1px 0 #fff;
+  opacity: 0.5;
+  border: none;
+  outline: none;
+  background-color: transparent;
+}
+
+.v-modal-header .v-close:hover {
+  opacity: 1;
+}
+
+.v-modal-body {
+  position: relative;
+  -webkit-box-flex: 1;
+      -ms-flex: 1 1 auto;
+          flex: 1 1 auto;
+  padding: 1rem;
+}
+
+.v-modal-body label {
+  padding-left: 0;
+}
+
+.v-modal-footer {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  -webkit-box-pack: end;
+      -ms-flex-pack: end;
+          justify-content: flex-end;
+  padding: 1rem;
+  border-top: 1px solid #e9ecef;
+}
+
 /** Single Property **/
 
 h1.title {
@@ -11286,7 +11356,7 @@ select.selectpicker {
 }
 
 .bootstrap-select .dropdown-menu li.active small {
-  color: #fff;
+  color: rgba(255, 255, 255, 0.5) !important;
 }
 
 .bootstrap-select .dropdown-menu li.disabled a {

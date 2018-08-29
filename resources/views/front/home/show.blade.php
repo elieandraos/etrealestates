@@ -27,7 +27,12 @@
 		<div class="col-md-4 property-details">
 			<p class="description">{!! $property->description !!} </p>
 			<div class="inquiry">
-				<input type="button" class="btn btn-primary" value="Inquire about this property" />
+				<button 
+					@click="$modal.show('inquire-property', { reference: '{!! $property->reference!!}' })" 
+					class="btn btn-primary"
+				>
+					Inquire about this property
+				</button>
 			</div>
 			<property-feature :text="'Square meter <sup>2</sup>'" :fa-icon="'fa-object-group'" :value="'{!! $property->sq_ft !!}'"></property-feature>
 			<property-feature :text="'Number of bedrooms'" :fa-icon="'fa-bed'" :value="'{!! $property->nb_bedrooms !!}'"></property-feature>

@@ -34,13 +34,9 @@
 </template>
 
 <script>
-	import RangeSlider from 'v-range-slider'
 	import {EventBus} from './../EventBus.js';
 
     export default {
-    	components: {
-			RangeSlider
-		},
         props: {
             areas: {
                 required: true,

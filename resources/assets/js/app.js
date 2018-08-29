@@ -9,9 +9,11 @@ require('./bootstrap');
 
 import Vue from 'vue';
 import VueSwal from 'vue-swal';
+import VModal from 'vue-js-modal';
 require('bootstrap-select');
 
-Vue.use(VueSwal)
+Vue.use(VueSwal);
+Vue.use(VModal);
 
 /**
  * Next, we will create a fresh Vue application instance and attach it to
@@ -25,6 +27,7 @@ Vue.component('properties', require('./components/Properties.vue'));
 Vue.component('properties-filter', require('./components/PropertiesFilter.vue'));
 Vue.component('property-feature', require('./components/PropertyFeature.vue'));
 Vue.component('property-card', require('./components/PropertyCard.vue'));
+Vue.component('inquire-modal', require('./components/InquireModal.vue'));
 Vue.component('google-maps-locator', require('./components/GoogleMapsLocationSelector.vue'));
 
 const app = new Vue({

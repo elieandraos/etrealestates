@@ -21,7 +21,7 @@
 
 	export default {
 		components: { InfiniteLoading, PropertyCard },
-		 mixins: [ Helper ],
+		mixins: [ Helper ],
 		data(){
             return {
                 properties: {},

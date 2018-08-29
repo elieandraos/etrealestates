@@ -72,6 +72,8 @@
 
         <main class="@if(URL::current() != URL::to('/')) py-4 @endif">
             @yield('content')
+            <!-- Inquire Property Modal -->
+            <inquire-modal></inquire-modal>
         </main>
 
         <div class="container-fluid footer">

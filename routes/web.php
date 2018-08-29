@@ -16,6 +16,7 @@ Route::post('/properties/fetch', 'HomeController@fetch')->name('home.fetch');
 Route::post('/inquire', 'InquiryController@store')->name('inquire');
 Route::get('/properties/{reference}/show', 'HomeController@show')->name('home.show');
 
+Route::redirect('/admin', '/properties', 301);
 Auth::routes();
 
 Route::namespace('Admin')->middleware(['auth'])->group(function () {

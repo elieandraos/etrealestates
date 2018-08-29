@@ -2,8 +2,10 @@
 
 namespace App\Providers;
 
+use App\Models\Inquiry;
 use App\Models\Property;
 use App\Observers\PropertyObserver;
+use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -15,7 +17,11 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot()
     {
+        // property observer to add reference upon creation
         Property::observe(PropertyObserver::class);
+        // view share count of new inquiries
+        $nbNewInquiries = Inquiry::where('status', 'new')->count();
+        View::share('nbNewInquiries', $nbNewInquiries);
     }
 
     /**

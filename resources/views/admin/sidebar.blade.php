@@ -7,7 +7,10 @@
 	</li>
 	<li>
 		<a href='{!! route('inquiries.index') !!}' @if(URL::current() == URL::to('inquiries')) class='active' @endif>
-			<i class="fa fa-envelope-o" aria-hidden="true"></i> Inquiries
+			<i class="fa fa-envelope-o" aria-hidden="true"></i> Inquiries 
+			@if($nbNewInquiries)
+				<span class="badge badge-secondary" style="font-size:66%">{!! $nbNewInquiries !!}</span>
+			@endif
 		</a>
 	</li>
 	<li class='header'>Administration</li>

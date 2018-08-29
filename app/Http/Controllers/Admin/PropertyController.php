@@ -26,10 +26,9 @@ class PropertyController extends Controller
         $featuredOptions = [ 0 => 'Not Featured', 1 => 'Is Featured' ];
         $publishedOptions = [ 0 => 'Not Published', 1 => 'Is Published' ];
         
-        return view('admin.properties.edit', [
+        return view('admin.properties.create', [
                     'types' => $types, 
                     'areas' => $areas, 
-                    'property' => $property, 
                     'featuredOptions' => $featuredOptions,
                     'publishedOptions' => $publishedOptions,
         ]);

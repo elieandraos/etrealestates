@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 
 class Inquiry extends Model
@@ -21,4 +22,15 @@ class Inquiry extends Model
         'reference',
         'status'
     ];
+
+    /**
+     * Created at accessor
+     * 
+     * @param type $value 
+     * @return type
+     */
+    public function getInquiredAtAttribute()
+    {
+        return Carbon::parse($this->created_at)->format('d M, Y h:i');
+    }
 }

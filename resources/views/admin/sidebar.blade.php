@@ -5,6 +5,11 @@
 			<i class="fa fa-home" aria-hidden="true"></i> Properties
 		</a>
 	</li>
+	<li>
+		<a href='{!! route('inquiries.index') !!}' @if(URL::current() == URL::to('inquiries')) class='active' @endif>
+			<i class="fa fa-envelope-o" aria-hidden="true"></i> Inquiries
+		</a>
+	</li>
 	<li class='header'>Administration</li>
 	<li>
 		<a href='{!! route('areas.index') !!}' @if(URL::current() == URL::to('areas')) class='active' @endif>

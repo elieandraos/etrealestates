@@ -13,19 +13,11 @@ class UsersSeeder extends Seeder
     public function run()
     {
         User::updateOrCreate([
-        	'email' => 'elie@etrealestates.com'
-        ], [
-        	'first_name' => 'Elie',
-        	'last_name' => 'Tarabay',
-        	'password' => bcrypt('et2018'),
-        ]);
-
-         User::updateOrCreate([
         	'email' => 'toufic@etrealestates.com'
         ],[
         	'first_name' => 'Toufic',
         	'last_name' => 'Ghanem',
-        	'password' => bcrypt('et2018'),
+        	'password' => bcrypt('123456'),
         ]);
     }
 }

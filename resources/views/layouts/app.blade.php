@@ -16,15 +16,16 @@
     <!-- Fonts -->
     <link rel="dns-prefetch" href="https://fonts.gstatic.com">
 
-     <!-- Maps -->
-    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBgPayHLAAjvMDfahfJn7XmfSRDfJEDYXA"></script>
 
     <!-- Styles -->
     <link href="{{ asset('css/app.css') }}" rel="stylesheet">
 
-    <!-- SEO Meta Tags -->
     @guest
+        <!-- SEO Meta Tags -->
         {!! SEO::generate() !!}
+    @else
+        <!-- Maps -->
+        <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBgPayHLAAjvMDfahfJn7XmfSRDfJEDYXA"></script>
     @endguest
 
 </head>

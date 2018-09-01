@@ -21,12 +21,14 @@ class AppServiceProvider extends ServiceProvider
         // property observer to add reference upon creation
         Property::observe(PropertyObserver::class);
         
-        if(Auth::user()
+        view()->composer('*', function ($view) 
         {
-            // view share count of new inquiries
-            $nbNewInquiries = Inquiry::where('status', 'new')->count();
-            View::share('nbNewInquiries', $nbNewInquiries);
-        }
+            //The callback will be executed only when the view is actually being composed, so middlewares will be already executed and session will be available
+            if(Auth::user()){
+                $nbNewInquiries = Inquiry::where('status', 'new')->count();
+                $view->with('nbNewInquiries', $nbNewInquiries);
+            }    
+        });
     }
 
     /**

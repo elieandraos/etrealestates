@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Inquiry;
 use Illuminate\Http\Request;
+use App\Mail\PropertyInquired;
+use Illuminate\Support\Facades\Mail;
 
 class InquiryController extends Controller
 {
@@ -16,6 +18,7 @@ class InquiryController extends Controller
     public function store(Request $request)
     {
     	Inquiry::create($request->all());
+    	Mail::to('rgreconsultancy@gmail.com')->send(new PropertyInquired($request));
     	return response()->json(['success' => true]);
     }
 }

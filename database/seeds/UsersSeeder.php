@@ -13,7 +13,7 @@ class UsersSeeder extends Seeder
     public function run()
     {
         User::updateOrCreate([
-        	'email' => 'toufic@rgrealestate.me'
+        	'email' => 'rgreconsultancy@gmail.com'
         ],[
         	'first_name' => 'Toufic',
         	'last_name' => 'Ghanem',

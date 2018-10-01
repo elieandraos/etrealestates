@@ -10,9 +10,9 @@ class PropertyFilter extends QueryFilter
      * @param type $value 
      * @return type
      */
-    public function area($value)
+    public function area($value = null)
     {
-        if($value == -1)
+        if(!$value || $value == -1)
             return $this->builder;
 
         return $this->builder->where('area_id', $value);
@@ -56,6 +56,20 @@ class PropertyFilter extends QueryFilter
     public function published($value = true)
     {
         return $this->builder->where('is_published', $value);
+    }
+
+    /**
+     * Filter by reference
+     * 
+     * @param type|null $value 
+     * @return type
+     */
+    public function reference($value = null)
+    {
+        if(!trim($value))
+            return $this->builder;
+
+        return $this->builder->where('reference', 'LIKE', '%'.$value.'%');
     }
 }
 

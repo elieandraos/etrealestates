@@ -23,6 +23,8 @@
                         </center>
                     @else
                         @include('flash::message')
+                        @include('admin.properties.filter')
+
                         <table class="table table-hover">
                             <thead>
                                 <tr>
@@ -54,7 +56,7 @@
                             </tbody>  
                         </table>
 
-                        {{ $properties->links() }}
+                        {{ $properties->appends(request()->except(['page','_token']))->links() }}
                     @endif
                 </div>
             </div>

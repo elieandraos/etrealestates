@@ -9,14 +9,23 @@ use App\Models\Property;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\PropertyRequest;
+use App\Andraos\Filters\PropertyFilter;
 use Illuminate\Support\Facades\Storage;
 
 class PropertyController extends Controller
 {
-    public function index() 
+    public function index(Request $request) 
     {
-    	$properties = Property::with('area', 'type')->orderBy('created_at', 'DESC')->paginate(20);
-    	return view('admin.properties.index', ['properties' => $properties]);
+        $areas = Area::orderBy('name', 'ASC')->pluck('name', 'id')->toArray();
+    	$properties = Property::with('area', 'type')
+                            ->filter(new PropertyFilter( [
+                                'area' => $request->get('area'),
+                                'reference' => $request->get('reference')
+                            ]))
+                            ->orderBy('created_at', 'DESC')
+                            ->paginate(20);
+
+    	return view('admin.properties.index', [ 'properties' => $properties, 'areas' => $areas ]);
     }
 
     public function create() 

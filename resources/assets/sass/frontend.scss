@@ -134,3 +134,15 @@ div.footer div.copyright{
 /** End Footer **/
 
 
+@media screen and (max-width: 579px) {
+    div#filters {
+        display: block !important;
+    }
+    div.filter-item {
+        display: block !important;
+    }
+    .bootstrap-select:not([class*="col-"]):not([class*="form-control"]):not(.input-group-btn){
+        width: 100% !important;
+    }
+}
+

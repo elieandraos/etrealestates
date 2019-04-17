@@ -78,7 +78,7 @@ class PropertyFilter extends QueryFilter
      * @param type|null $value 
      * @return type
      */
-    public function listed_for($value) 
+    public function listed_for($value = -1) 
     {
         if($value == -1)
             return $this->builder;

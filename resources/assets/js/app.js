@@ -21,14 +21,17 @@ Vue.use(VModal);
  * or customize the JavaScript scaffolding to fit your unique needs.
  */
 
-Vue.component('confirm-delete', require('./components/ConfirmDelete.vue'));
-Vue.component('preview-upload', require('./components/PreviewUpload.vue'));
-Vue.component('properties', require('./components/Properties.vue'));
-Vue.component('properties-filter', require('./components/PropertiesFilter.vue'));
-Vue.component('property-feature', require('./components/PropertyFeature.vue'));
-Vue.component('property-card', require('./components/PropertyCard.vue'));
-Vue.component('inquire-modal', require('./components/InquireModal.vue'));
-Vue.component('google-maps-locator', require('./components/GoogleMapsLocationSelector.vue'));
+/**
+ * The following block of code may be used to automatically register your
+ * Vue components. It will recursively scan this directory for the Vue
+ * components and automatically register them with their "basename".
+ *
+ * Eg. ./components/ExampleComponent.vue -> <example-component></example-component>
+ */
+
+const files = require.context('./', true, /\.vue$/i)
+files.keys().map(key => Vue.component(key.split('/').pop().split('.')[0], files(key).default))
+
 
 const app = new Vue({
     el: '#app'

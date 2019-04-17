@@ -87,6 +87,7 @@
 	}
 	.card-content .thumb{
 		width: 100%;
+		height: 262px;
 	}
 	.card-content .card-header{
 		position: relative;
@@ -146,6 +147,7 @@
 	    color: #000;
 	    text-transform: capitalize;
 	    font-weight: 400;
+	    height: 60px;
 	}
 	.card-content .card-body h3.subtitle{
 		font-size: 15px;

@@ -11,6 +11,7 @@
 						:areas="'{{ json_encode($areas) }}'"
 						:types="'{{ json_encode($types) }}'"
 						:price-ranges="'{{ json_encode($price_ranges) }}'"
+						:listings="'{{ json_encode($listings) }}'"
 						:csrf="'{{ csrf_token() }}'"
 					>
 					</properties-filter>

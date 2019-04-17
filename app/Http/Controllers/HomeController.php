@@ -33,10 +33,16 @@ class HomeController extends Controller
             '1000000' => 'Up to 1,000,000 $',
         ];
 
+        $listings = [
+            'rent' => 'Rent',
+            'sale' => 'Sale',
+        ];
+
         return view('front.home.index', [
             'types' => $types, 
             'areas' => $areas,
-            'price_ranges' => $price_ranges 
+            'price_ranges' => $price_ranges,
+            'listings' => $listings 
         ]);
     }
 
@@ -52,6 +58,7 @@ class HomeController extends Controller
                             ->filter(new PropertyFilter( [
                                 'area' => $request->get('area'),
                                 'type' => $request->get('type'),
+                                'listed_for' => $request->get('listed_for'),
                                 'maxAmount'  => $request->get('maxAmount'),
                                 'published' => true
                             ]))

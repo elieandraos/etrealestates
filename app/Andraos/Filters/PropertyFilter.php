@@ -71,6 +71,20 @@ class PropertyFilter extends QueryFilter
 
         return $this->builder->where('reference', 'LIKE', '%'.$value.'%');
     }
+
+    /**
+     * Filter by listed_for
+     * 
+     * @param type|null $value 
+     * @return type
+     */
+    public function listed_for($value) 
+    {
+        if($value == -1)
+            return $this->builder;
+        
+        return $this->builder->where('listed_for', '=', $value);
+    } 
 }
 
 ?>

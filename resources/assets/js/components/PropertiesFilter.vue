@@ -26,6 +26,14 @@
 					</select>
 				</div>
 
+				<div class="filter-item">
+					<label>Listed For:</label>
+					<select name="listed_for" class="selectpicker" v-model="payload.listed_for">
+						<option value="-1">All Listings</option>
+						<option v-for="(value, key) in filters.listings" :value="key">{{ value }}</option>
+					</select>
+				</div>
+
 				<div class="filter-item" style="vertical-align: middle">
 					<input type="submit" class="btn btn-primary" value="Search" />
 				</div>
@@ -44,6 +52,9 @@
             priceRanges: {
                 required: true,
             },
+            listings: {
+                required: true,
+            },
             types: {
                 required: true,
             },
@@ -57,12 +68,14 @@
 	        		area: -1,
 	        		type: -1,
 	        		maxAmount: -1,
+	        		listed_for: -1,
 	        		_token: this.csrf
 	        	},
 	        	filters: {
 	        		areas: {},
 	        		types: {},
-	        		prices: {}
+	        		prices: {},
+	        		listings: {}
 	        	}
 	        }
 	    },
@@ -78,6 +91,7 @@
         	this.filters.areas = JSON.parse(this.areas);
         	this.filters.types = JSON.parse(this.types);
         	this.filters.prices = JSON.parse(this.priceRanges);
+        	this.filters.listings = JSON.parse(this.listings);
         },
         methods: {
             handleSubmit() {
@@ -116,7 +130,7 @@ h1.banner-title{
 div.filter-item{
     margin-right: 20px;
     display: table-cell;
-    padding: 20px 30px;
+    padding: 20px 15px;
 }
 
 div.filter-item label{

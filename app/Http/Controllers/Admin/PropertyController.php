@@ -8,6 +8,7 @@ use App\Models\Type;
 use App\Models\Property;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use Spatie\MediaLibrary\Models\Media;
 use App\Http\Requests\PropertyRequest;
 use App\Andraos\Filters\PropertyFilter;
 use Illuminate\Support\Facades\Storage;
@@ -93,4 +94,37 @@ class PropertyController extends Controller
         $property = Property::findOrFail($propertyId);
         $property->delete();
 	}
+
+    public function gallery($propertyId)
+    {
+        $property = Property::findOrFail($propertyId);
+
+        $medias = $property->getMedia('gallery');
+        $loadedFiles = [];
+        if($medias) {
+            foreach($medias as $media) {
+                $loadedFiles[] = [
+                    'size' => $media->size,
+                    'name' => $media->name,
+                    'type' => $media->mime_type,
+                    'url' => url($media->getUrl()),
+                    'id' => $media->id,
+                ];
+            }
+        }
+
+        return view('admin.properties.gallery', [ 'property' => $property, 'loadedFiles' => json_encode($loadedFiles)]);
+    }
+
+    public function upload(Request $request, $propertyId)
+    {
+        $property = Property::findOrFail($propertyId);
+        $property->addMediaFromRequest('file')->toMediaCollection('gallery');
+    }
+
+    public function removeMedia(Request $request, $mediaId)
+    {
+        $media = Media::findOrFail($mediaId);
+        $media->delete();
+    }
 }

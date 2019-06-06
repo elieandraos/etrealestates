@@ -23,5 +23,8 @@ Route::namespace('Admin')->middleware(['auth'])->group(function () {
     Route::resource('areas', 'AreaController');
     Route::resource('types', 'TypeController');
     Route::resource('properties', 'PropertyController');
+    Route::get('properties/{property}/gallery', 'PropertyController@gallery')->name('properties.gallery');
+    Route::post('properties/{property}/upload', 'PropertyController@upload')->name('properties.upload');
+    Route::post('properties/remove-media/{mediaId}', 'PropertyController@removeMedia')->name('properties.remove-media');
     Route::resource('inquiries', 'InquiryController')->only(['index', 'show']);
 });

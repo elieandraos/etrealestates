@@ -181,6 +181,19 @@ class Property extends Model implements HasMedia
                         ->width(768)
                         ->height(576);
                 });
+
+        $this->addMediaCollection('gallery')
+                ->registerMediaConversions(function (Media $media) {
+                    $this
+                        ->addMediaConversion('thumb')
+                        ->width(320)
+                        ->height(240);
+
+                    $this
+                        ->addMediaConversion('full')
+                        ->width(768)
+                        ->height(576);
+                });
     }
     
 }

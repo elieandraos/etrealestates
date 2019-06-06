@@ -88,8 +88,17 @@ class HomeController extends Controller
         SEO::opengraph()->addImage(['url' => 'https://avatars1.githubusercontent.com/u/11164074?s=400&amp;v=4']);
 
         $data = Property::related($property)->get();
+        
+        $medias = $property->getMedia('gallery');
+        $mediaUrls = [];
+        if($medias) {
+            foreach($medias as $media) {
+                $mediaUrls[] = url($media->getUrl());
+            }
+        }
+
         $relatedProperties  = PropertyResource::collection($data);
         
-        return view('front.home.show', ['property' => $property, 'relatedProperties' => $relatedProperties]);
+        return view('front.home.show', ['property' => $property, 'relatedProperties' => $relatedProperties, 'mediaUrls' => json_encode($mediaUrls)]);
     }
 }

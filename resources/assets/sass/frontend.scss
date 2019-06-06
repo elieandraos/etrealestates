@@ -133,6 +133,10 @@ div.footer div.copyright{
 }
 /** End Footer **/
 
+.blueimp-gallery>.slides>.slide>.slide-content {
+    max-width: 80% !important;
+    max-height: 80% !important;
+}
 
 @media screen and (max-width: 579px) {
     div#filters {

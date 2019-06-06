@@ -41,6 +41,8 @@
 		</div>
 	</div>
 
+	<gallery :images="{{ $mediaUrls }}"></gallery>
+	
 	@if($relatedProperties->count())
 		<div class="row">
 			<div class="col-md-12 section-header">

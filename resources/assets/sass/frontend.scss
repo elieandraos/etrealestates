@@ -138,6 +138,10 @@ div.footer div.copyright{
     max-height: 80% !important;
 }
 
+td.row-actions {
+    padding: .55rem;
+}
+
 @media screen and (max-width: 579px) {
     div#filters {
         display: block !important;

@@ -44,7 +44,7 @@
 	<gallery :images="{{ $mediaUrls }}"></gallery>
 	
 	@if($relatedProperties->count())
-		<div class="row">
+		<div class="row" style="clear:both">
 			<div class="col-md-12 section-header">
 				<h3 class="section-title">Related properties</h3>
 			</div>

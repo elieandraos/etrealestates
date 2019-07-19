@@ -19,10 +19,10 @@ class HomeController extends Controller
      */
     public function index()
     {
-        SEO::setTitle('ET Real Estates');
-        SEO::setDescription('ET Real Estates number one property finder.');
-        SEO::opengraph()->setUrl('http://current.url.com');
-        SEO::opengraph()->addImage(['url' => 'https://avatars1.githubusercontent.com/u/11164074?s=400&amp;v=4']);
+        SEO::setTitle('RG Real Estates');
+        SEO::setDescription('RG Real Estates number one property finder.');
+        SEO::opengraph()->setUrl('https://rgrealestate.me/');
+        //SEO::opengraph()->addImage(['url' => 'https://avatars1.githubusercontent.com/u/11164074?s=400&amp;v=4']);
 
         $types = Type::orderBy('name', 'ASC')->pluck('name', 'id');
         $areas = Area::orderBy('name', 'ASC')->pluck('name', 'id');
